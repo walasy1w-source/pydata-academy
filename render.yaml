@@ -1,0 +1,43 @@
+# Deploy "Infrastructure as Code" no Render.
+# Basta conectar o repositório no Render e escolher "Use render.yaml",
+# ou usar o botão "New Web Service" / "New Static Site" apontando para este repositório.
+#
+# Este arquivo define DOIS serviços independentes — suba só o que precisar:
+#   1. pydata-academy-site     → o site (index.html, notebooks, etc.), 100% GRÁTIS, sempre no ar.
+#   2. pydata-academy-backend  → a API opcional de correção automática (plano free "dorme" quando ocioso).
+#
+# Se você só quer publicar o site (recomendado para começar), pode até apagar
+# o serviço "pydata-academy-backend" abaixo — o site funciona sem ele.
+services:
+  # --------------------------------------------------------------------
+  # 1) SITE (estático) — index.html, notebooks, índice do curso etc.
+  #    Custo: R$ 0 (plano free de site estático do Render não dorme e não expira).
+  # --------------------------------------------------------------------
+  - type: web
+    name: pydata-academy-site
+    env: static
+    plan: free
+    buildCommand: "echo 'Site estático, nada para compilar'"
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # --------------------------------------------------------------------
+  # 2) BACKEND (opcional) — API de correção automática (app.py).
+  #    Só é necessário se você quiser o recurso de correção via servidor;
+  #    o site funciona normalmente mesmo sem este serviço no ar.
+  # --------------------------------------------------------------------
+  - type: web
+    name: pydata-academy-backend
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --threads 4 --timeout 30
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+    healthCheckPath: /

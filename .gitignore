@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+progresso.db
+.venv/
+venv/
+.env
+docxbuild/
+.DS_Store

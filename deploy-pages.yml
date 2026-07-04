@@ -1,0 +1,50 @@
+# ============================================================================
+# Deploy automático e GRATUITO do site (index.html + notebooks) no GitHub Pages.
+#
+# COMO INSTALAR ESTE ARQUIVO NO SEU REPOSITÓRIO:
+#   1. Dentro do seu repositório, crie as pastas: .github/workflows/
+#   2. Salve este arquivo exatamente em:  .github/workflows/deploy-pages.yml
+#      (o nome do arquivo não importa, mas o caminho .github/workflows/ importa)
+#   3. No GitHub, vá em Settings → Pages → em "Source" escolha "GitHub Actions".
+#   4. Dê um "git push" — a cada push na branch main, o site é publicado sozinho.
+#
+# Depois do primeiro deploy, seu site fica disponível em:
+#   https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/
+# ============================================================================
+name: Deploy site no GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch: # permite rodar manualmente pela aba "Actions" também
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar os arquivos do repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar o GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Empacotar o site inteiro (raiz do repositório) para publicação
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

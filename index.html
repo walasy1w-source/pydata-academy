@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyData Academy — Curso Completo de Python para Ciência de Dados</title>
+
+<!-- ===== BIBLIOTECAS EXTERNAS (CDN) =====
+     Fonte Inter (Google Fonts) + Font Awesome (ícones) + AOS (animações on-scroll)
+     + Pyodide (Python rodando no navegador via WebAssembly, usado no Playground)
+     + jsPDF (geração do certificado em PDF no navegador)
+     Todas carregadas via CDN — nenhuma dependência de backend. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+<!-- Pyodide é carregado sob demanda (só quando o Playground é aberto), pois é um pacote grande -->
+
+<style>
+:root{
+  --navy-1:#0b1120;
+  --navy-2:#0a1330;
+  --navy-3:#0d1b3e;
+  --navy-4:#122156;
+  --gold:#d4af37;
+  --gold-light:#f1d675;
+  --gold-dim:rgba(212,175,55,.25);
+  --text:#eef1f8;
+  --text-dim:#aab4d4;
+  --card:#0e1a40;
+  --border:rgba(212,175,55,.22);
+  --radius:14px;
+  --maxw:1180px;
+}
+/* ===== TEMA CLARO =====
+   Ativado via atributo data-theme="light" na tag <html> (ver toggleTheme() no JS).
+   Mantém a mesma identidade azul-escuro + dourado, mas invertendo fundo/texto. */
+html[data-theme="light"]{
+  --navy-1:#f4f6fb;
+  --navy-2:#ffffff;
+  --navy-3:#eef1f8;
+  --navy-4:#ffffff;
+  --text:#0b1120;
+  --text-dim:#454e6b;
+  --card:#ffffff;
+  --border:rgba(180,140,20,.3);
+  --gold-dim:rgba(212,175,55,.15);
+}
+html[data-theme="light"] body{box-shadow:none;}
+html[data-theme="light"] .code-window pre{color:#12305c;}
+html[data-theme="light"] .chapter-body pre{color:#12305c;background:#f0f3fb;}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  background:linear-gradient(180deg,var(--navy-1),var(--navy-2) 40%,var(--navy-1));
+  color:var(--text);
+  line-height:1.6;
+  transition:background .25s,color .25s;
+}
+a{color:var(--gold-light);text-decoration:none;}
+img{max-width:100%;}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+h1,h2,h3,h4{font-family:'Inter','Segoe UI',Roboto,sans-serif;font-weight:700;color:var(--text);}
+h1{font-size:2.6rem;}
+h2{font-size:2rem;margin-bottom:8px;}
+h3{font-size:1.3rem;}
+p{color:var(--text-dim);}
+.gold{color:var(--gold);}
+.badge{
+  display:inline-block;background:var(--gold-dim);color:var(--gold-light);
+  border:1px solid var(--border);border-radius:999px;padding:4px 14px;font-size:.78rem;
+  letter-spacing:.5px;text-transform:uppercase;font-weight:600;
+}
+.btn{
+  display:inline-block;border-radius:8px;padding:13px 26px;font-weight:700;
+  cursor:pointer;border:none;font-size:.95rem;transition:transform .15s,box-shadow .15s;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn-gold{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1200;box-shadow:0 6px 18px rgba(212,175,55,.25);}
+.btn-outline{background:transparent;color:var(--gold-light);border:1.5px solid var(--gold);}
+.btn-sm{padding:8px 16px;font-size:.82rem;}
+
+/* NAV */
+header.nav{
+  position:sticky;top:0;z-index:100;background:rgba(6,12,31,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:var(--maxw);margin:0 auto;padding:14px 24px;}
+.logo{font-size:1.3rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.logo span{color:var(--gold);}
+.nav-links{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.nav-links button.linklike{
+  background:none;border:none;color:var(--text-dim);font-size:.95rem;cursor:pointer;font-weight:600;
+  padding:6px 2px;border-bottom:2px solid transparent;
+}
+.nav-links button.linklike:hover,.nav-links button.linklike.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+
+/* HERO */
+.hero{padding:80px 0 60px;position:relative;overflow:hidden;}
+.hero::before{
+  content:"";position:absolute;top:-120px;right:-160px;width:480px;height:480px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,175,55,.18),transparent 70%);
+}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;}
+.hero h1{margin:14px 0 18px;}
+.hero p.lead{font-size:1.1rem;max-width:520px;}
+.hero-cta{display:flex;gap:14px;margin-top:26px;flex-wrap:wrap;}
+.hero-stats{display:flex;gap:28px;margin-top:36px;flex-wrap:wrap;}
+.hero-stats div b{display:block;font-size:1.5rem;color:var(--gold-light);}
+.hero-stats div span{font-size:.82rem;color:var(--text-dim);}
+.code-window{
+  background:var(--navy-4);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:0 20px 50px rgba(0,0,0,.4);overflow:hidden;
+}
+.code-window .bar{display:flex;gap:6px;padding:10px 14px;background:rgba(255,255,255,.04);}
+.code-window .bar span{width:11px;height:11px;border-radius:50%;background:#555;}
+.code-window .bar span:nth-child(1){background:#e05a5a;}
+.code-window .bar span:nth-child(2){background:#e0b95a;}
+.code-window .bar span:nth-child(3){background:#59c46a;}
+.code-window pre{margin:0;padding:20px;font-family:Consolas,Monaco,monospace;font-size:.86rem;color:#cfe0ff;overflow-x:auto;}
+.code-window .c{color:#7f92c9;} .code-window .k{color:var(--gold-light);} .code-window .s{color:#9fe6a0;}
+
+section{padding:64px 0;}
+.section-head{max-width:640px;margin:0 auto 40px;text-align:center;}
+.section-head p{margin-top:10px;}
+
+/* MODULE GRID */
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;}
+.module-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;cursor:pointer;
+  transition:transform .18s,border-color .18s;position:relative;
+}
+.module-card:hover{transform:translateY(-4px);border-color:var(--gold);}
+.module-card .num{
+  width:38px;height:38px;border-radius:8px;background:var(--gold-dim);color:var(--gold-light);
+  display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:14px;
+}
+.module-card h3{margin:0 0 8px;font-size:1.05rem;}
+.module-card p{font-size:.85rem;margin:0 0 10px;}
+.module-card .meta{font-size:.78rem;color:var(--gold-light);font-weight:600;}
+.extra-title{margin-top:52px;}
+
+/* PARA QUEM */
+.audience-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;}
+.audience-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center;}
+.audience-card .ico{font-size:2rem;margin-bottom:10px;}
+
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+.testi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;}
+.testi-card .stars{color:var(--gold);margin-bottom:10px;letter-spacing:2px;}
+.testi-card .who{display:flex;align-items:center;gap:12px;margin-top:16px;}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1a1200;}
+.who b{display:block;font-size:.92rem;color:var(--text);}
+.who span{font-size:.78rem;color:var(--text-dim);}
+
+/* FAQ / ACCORDION (details) */
+details.acc{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;padding:2px 0;overflow:hidden;}
+details.acc summary{list-style:none;cursor:pointer;padding:16px 20px;font-weight:700;display:flex;justify-content:space-between;align-items:center;color:var(--text);}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+";color:var(--gold);font-size:1.3rem;transition:transform .2s;}
+details.acc[open] summary::after{transform:rotate(45deg);}
+details.acc .acc-body{padding:0 20px 18px;color:var(--text-dim);}
+
+/* JUPYTER CALLOUT */
+.jupyter-box{
+  background:linear-gradient(135deg,rgba(212,175,55,.14),rgba(13,27,62,.4));
+  border:1px solid var(--gold);border-radius:var(--radius);padding:26px;display:flex;gap:20px;align-items:center;
+  flex-wrap:wrap;margin:30px 0;
+}
+.jupyter-box .emoji{font-size:2.4rem;}
+.jupyter-box .txt{flex:1;min-width:220px;}
+.jupyter-box h4{margin:0 0 6px;color:var(--gold-light);}
+.jupyter-box p{margin:0;font-size:.9rem;}
+
+/* SPRINT PAGE */
+.sprint-header{padding:50px 0 20px;}
+.sprint-header .badge{margin-bottom:14px;}
+.chapter-list{margin-top:26px;}
+details.chapter{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;}
+details.chapter summary{list-style:none;cursor:pointer;padding:18px 22px;font-weight:700;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center;}
+details.chapter summary::-webkit-details-marker{display:none;}
+details.chapter summary::after{content:"▾";color:var(--gold);transition:transform .2s;font-size:1.1rem;}
+details.chapter[open] summary::after{transform:rotate(180deg);}
+.chapter-body{padding:0 22px 26px;border-top:1px solid var(--border);}
+.chapter-body h4{color:var(--gold-light);margin:20px 0 8px;font-size:1rem;}
+.chapter-body ul{color:var(--text-dim);padding-left:20px;}
+.chapter-body pre{
+  background:#081029;border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto;
+  font-family:Consolas,Monaco,monospace;font-size:.84rem;color:#cfe0ff;
+}
+.exercise{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;}
+.exercise b{color:var(--gold-light);}
+details.solution{margin-top:8px;}
+details.solution summary{cursor:pointer;color:var(--gold);font-weight:600;font-size:.85rem;}
+.quiz-q{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.quiz-q .opt{display:block;font-size:.88rem;color:var(--text-dim);margin:4px 0;}
+details.gabarito summary{cursor:pointer;color:var(--gold);font-weight:600;font-size:.85rem;margin-top:6px;}
+.placeholder-box{background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:10px;padding:24px;text-align:center;color:var(--text-dim);font-style:italic;}
+.glossary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:14px;}
+.glossary-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;}
+.glossary-item b{color:var(--gold-light);}
+.checklist{list-style:none;padding:0;margin-top:14px;}
+.checklist li{padding:8px 0;border-bottom:1px dashed var(--border);color:var(--text-dim);font-size:.92rem;}
+.checklist li::before{content:"☑ ";color:var(--gold);}
+
+/* BLOG */
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;}
+.blog-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.blog-card .meta{font-size:.78rem;color:var(--gold-light);margin-bottom:8px;}
+details.article summary{cursor:pointer;color:var(--gold);font-weight:700;margin-top:10px;}
+.article-body{color:var(--text-dim);font-size:.92rem;margin-top:10px;}
+
+/* FORMS */
+.form-wrap{max-width:480px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:34px;}
+.form-wrap label{display:block;font-size:.85rem;color:var(--text-dim);margin:14px 0 6px;font-weight:600;}
+.form-wrap input,.form-wrap select{
+  width:100%;padding:11px 14px;border-radius:8px;border:1px solid var(--border);background:var(--navy-3);
+  color:var(--text);font-size:.92rem;
+}
+.form-wrap input:focus,.form-wrap select:focus{outline:none;border-color:var(--gold);}
+.plan-opt{display:flex;align-items:center;gap:10px;background:var(--navy-3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;}
+.plan-opt input{width:auto;}
+.form-msg{margin-top:16px;padding:12px 14px;border-radius:8px;background:rgba(89,196,106,.12);border:1px solid #59c46a;color:#9fe6a0;font-size:.88rem;display:none;}
+
+/* AREA / DASHBOARD */
+.progress-bar{background:var(--navy-3);border-radius:6px;height:8px;overflow:hidden;margin-top:6px;}
+.progress-bar .fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));}
+.area-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:10px;}
+
+/* ===== DASHBOARD ESTILO TRIPLETEN (lista de sprints com lock/progresso/check) ===== */
+.tt-banner{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(212,175,55,.14),rgba(212,175,55,.03));border:1px solid var(--gold-dim);border-radius:12px;padding:16px 20px;margin-bottom:26px;}
+.tt-banner i{font-size:1.4rem;color:var(--gold);flex-shrink:0;}
+.tt-banner b{color:var(--gold-light);}
+.tt-banner p{margin:2px 0 0;font-size:.85rem;color:var(--text-dim);}
+.tt-banner .close-x{margin-left:auto;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;}
+.tt-sprint-list{display:flex;flex-direction:column;gap:10px;}
+.tt-sprint-card{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;cursor:pointer;transition:border-color .15s,transform .15s;}
+.tt-sprint-card:hover{border-color:var(--gold);transform:translateX(2px);}
+.tt-sprint-card.locked{cursor:not-allowed;opacity:.55;}
+.tt-sprint-card.locked:hover{border-color:var(--border);transform:none;}
+.tt-icon-tile{width:48px;height:48px;border-radius:10px;background:var(--navy-4);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;color:var(--gold-light);}
+.tt-sprint-card.done .tt-icon-tile{background:rgba(89,196,106,.15);color:#59c46a;}
+.tt-sprint-info{flex:1;min-width:0;}
+.tt-sprint-info h4{margin:0 0 3px;font-size:.95rem;}
+.tt-sprint-info .tt-meta{font-size:.76rem;color:var(--text-dim);}
+.tt-sprint-status{width:170px;flex-shrink:0;text-align:right;}
+.tt-sprint-status .tt-lock{color:var(--text-dim);font-size:1.1rem;}
+.tt-sprint-status .tt-done-check{color:#59c46a;font-size:1.3rem;}
+.tt-sprint-status .tt-remaining{font-size:.72rem;color:var(--text-dim);display:block;margin-top:5px;}
+@media(max-width:640px){
+  .tt-sprint-status{width:auto;text-align:left;margin-left:64px;}
+  .tt-sprint-card{flex-wrap:wrap;}
+}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:50px 0 24px;margin-top:40px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px;}
+.footer-grid h4{color:var(--gold-light);font-size:.95rem;margin-bottom:12px;}
+.footer-grid ul{list-style:none;padding:0;margin:0;}
+.footer-grid li{margin-bottom:8px;}
+.footer-grid li a{color:var(--text-dim);font-size:.88rem;}
+.footer-bottom{text-align:center;color:var(--text-dim);font-size:.8rem;margin-top:36px;padding-top:20px;border-top:1px solid var(--border);}
+
+/* ===== TOGGLES (tema / idioma) ===== */
+.icon-toggle{
+  background:var(--card);border:1px solid var(--border);color:var(--text-dim);width:38px;height:38px;
+  border-radius:8px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;
+}
+.icon-toggle:hover{border-color:var(--gold);color:var(--gold-light);}
+.lang-toggle{
+  background:var(--card);border:1px solid var(--border);color:var(--text-dim);padding:0 12px;height:38px;
+  border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:700;
+}
+
+/* ===== VIDEO EMBED ===== */
+.video-wrap{position:relative;padding-top:56.25%;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,.35);}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
+
+/* ===== PRICING ===== */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;align-items:stretch;}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px 26px;display:flex;flex-direction:column;}
+.price-card.featured{border:2px solid var(--gold);position:relative;transform:translateY(-6px);box-shadow:0 20px 40px rgba(212,175,55,.15);}
+.price-card.featured::before{content:"Mais popular";position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--gold);color:#1a1200;font-size:.72rem;font-weight:800;padding:4px 14px;border-radius:999px;}
+.price-card h3{margin-bottom:4px;}
+.price-card .price{font-size:2.1rem;font-weight:800;color:var(--gold-light);margin:10px 0;}
+.price-card .price span{font-size:.85rem;color:var(--text-dim);font-weight:500;}
+.price-card ul{list-style:none;padding:0;margin:16px 0 24px;flex:1;}
+.price-card ul li{padding:7px 0;font-size:.88rem;color:var(--text-dim);border-bottom:1px dashed var(--border);}
+.price-card ul li i{color:var(--gold);margin-right:8px;width:16px;}
+
+/* ===== GARANTIA ===== */
+.guarantee-box{display:flex;align-items:center;gap:24px;background:var(--card);border:1px solid var(--gold);border-radius:var(--radius);padding:28px;flex-wrap:wrap;}
+.guarantee-box i{font-size:2.6rem;color:var(--gold);}
+
+/* ===== PLAYGROUND (Pyodide) ===== */
+.playground-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.playground-box textarea{
+  width:100%;min-height:160px;background:#081029;color:#cfe0ff;border:1px solid var(--border);border-radius:10px;
+  font-family:Consolas,Monaco,monospace;font-size:.86rem;padding:14px;resize:vertical;
+}
+html[data-theme="light"] .playground-box textarea{background:#0d1b3e;color:#e7edff;}
+.playground-out{
+  margin-top:12px;background:#03060f;border:1px solid var(--border);border-radius:10px;padding:14px;
+  font-family:Consolas,Monaco,monospace;font-size:.84rem;color:#9fe6a0;min-height:70px;white-space:pre-wrap;
+}
+.playground-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;}
+.pill-status{font-size:.78rem;color:var(--text-dim);}
+
+/* Botões de recursos por exercício (Jupyter / Colab / Playground) */
+.resource-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.res-btn{
+  font-size:.72rem;font-weight:700;padding:6px 10px;border-radius:6px;border:1px solid var(--border);
+  background:var(--navy-3);color:var(--text-dim);cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  text-decoration:none;
+}
+.res-btn:hover{border-color:var(--gold);color:var(--gold-light);}
+.res-btn i{font-size:.8rem;}
+
+/* ===== PROJETO PRÁTICO ===== */
+.project-box{background:linear-gradient(135deg,rgba(212,175,55,.08),transparent);border:1px solid var(--gold);border-radius:12px;padding:18px 20px;margin-top:18px;}
+.project-box h4{color:var(--gold-light);margin:0 0 8px;}
+
+/* ===== QUIZ COM CORREÇÃO AUTOMÁTICA ===== */
+.quiz-q label.opt-radio{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--text-dim);margin:6px 0;cursor:pointer;}
+.quiz-q label.opt-radio input{accent-color:var(--gold);}
+.quiz-feedback{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:.85rem;display:none;}
+.quiz-feedback.ok{display:block;background:rgba(89,196,106,.12);border:1px solid #59c46a;color:#9fe6a0;}
+.quiz-feedback.bad{display:block;background:rgba(224,90,90,.12);border:1px solid #e05a5a;color:#f3a3a3;}
+.quiz-check-btn{margin-top:10px;}
+
+/* ===== GAMIFICAÇÃO ===== */
+.points-pill{background:var(--gold-dim);color:var(--gold-light);border:1px solid var(--border);border-radius:999px;padding:5px 14px;font-size:.8rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:14px;}
+.badge-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;opacity:.35;}
+.badge-card.earned{opacity:1;border-color:var(--gold);}
+.badge-card i{font-size:1.6rem;color:var(--gold);display:block;margin-bottom:8px;}
+.badge-card span{font-size:.75rem;color:var(--text-dim);}
+.mark-done-btn{font-size:.72rem;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;}
+.mark-done-btn.done{background:rgba(89,196,106,.12);border-color:#59c46a;color:#9fe6a0;}
+.ranking-table{width:100%;border-collapse:collapse;margin-top:14px;}
+.ranking-table th,.ranking-table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-size:.88rem;color:var(--text-dim);}
+.ranking-table th{color:var(--gold-light);font-size:.78rem;text-transform:uppercase;}
+.ranking-table tr.me{background:var(--gold-dim);}
+.ranking-table tr.me td{color:var(--text);font-weight:700;}
+
+/* ===== ASSISTENTE IA (chat flutuante) ===== */
+#aiFab{
+  position:fixed;bottom:24px;right:24px;width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1200;border:none;
+  font-size:1.4rem;cursor:pointer;box-shadow:0 10px 30px rgba(212,175,55,.4);z-index:200;
+}
+#aiChatWindow{
+  position:fixed;bottom:92px;right:24px;width:340px;max-width:90vw;height:460px;max-height:70vh;
+  background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.5);
+  display:none;flex-direction:column;overflow:hidden;z-index:200;
+}
+#aiChatWindow.open{display:flex;}
+.ai-chat-head{padding:14px 16px;background:var(--navy-4);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.ai-chat-head-id{display:flex;align-items:center;gap:10px;}
+.ai-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.ai-chat-head b{font-size:.9rem;display:block;}
+.ai-chat-head small{font-size:.68rem;color:#7de08a;font-weight:600;}
+.ai-chat-head button{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;}
+.ai-chat-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+.ai-msg-wrap{display:flex;flex-direction:column;max-width:88%;}
+.ai-msg-wrap.user{align-self:flex-end;align-items:flex-end;}
+.ai-msg-wrap.bot{align-self:flex-start;align-items:flex-start;}
+.ai-msg{padding:9px 12px;border-radius:10px;font-size:.85rem;line-height:1.45;white-space:pre-wrap;}
+.ai-msg.user{background:var(--gold-dim);color:var(--text);}
+.ai-msg.bot{background:var(--navy-3);color:var(--text-dim);}
+.ai-msg-time{font-size:.66rem;color:var(--text-dim);opacity:.65;margin-top:3px;padding:0 2px;}
+.ai-msg-think{margin-top:5px;font-size:.72rem;border:1px dashed var(--border);border-radius:8px;padding:6px 9px;color:var(--text-dim);width:100%;}
+.ai-msg-think summary{cursor:pointer;color:var(--gold-light);font-weight:600;}
+.ai-msg-feedback{display:flex;gap:8px;margin-top:5px;}
+.ai-msg-feedback button{background:none;border:none;color:var(--text-dim);opacity:.55;cursor:pointer;font-size:.8rem;transition:opacity .15s,color .15s;}
+.ai-msg-feedback button:hover{opacity:1;color:var(--gold-light);}
+.ai-msg-feedback button.active{opacity:1;color:var(--gold);}
+.ai-chat-input{display:flex;gap:6px;padding:10px;border-top:1px solid var(--border);}
+.ai-chat-input textarea{flex:1;resize:none;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--navy-3);color:var(--text);padding:8px 10px;font-size:.85rem;font-family:inherit;}
+.ai-chat-input button{background:var(--gold);border:none;border-radius:8px;width:38px;color:#1a1200;cursor:pointer;}
+.ai-settings{padding:12px 14px;border-top:1px solid var(--border);font-size:.78rem;color:var(--text-dim);}
+.ai-settings input{width:100%;padding:7px 9px;border-radius:6px;border:1px solid var(--border);background:var(--navy-3);color:var(--text);font-size:.78rem;margin-top:4px;}
+.ai-settings summary{cursor:pointer;color:var(--gold);font-weight:600;}
+
+/* ===== NEWSLETTER ===== */
+.newsletter-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.newsletter-row input{flex:1;min-width:160px;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--navy-3);color:var(--text);font-size:.82rem;}
+
+.page{display:none;}
+.page.active{display:block;}
+
+@media(max-width:860px){
+  .hero-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .nav-links{gap:12px;}
+  h1{font-size:2rem;}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="logo" onclick="navigateTo('home')"><span>🐍</span>PyData <span>Academy</span></div>
+    <nav class="nav-links" id="navLinks">
+      <button class="linklike" onclick="navigateTo('home')" data-i18n="nav.home">Início</button>
+      <button class="linklike" onclick="navigateTo('home');scrollToId('modulos')" data-i18n="nav.course">Curso</button>
+      <button class="linklike" onclick="navigateTo('playground')" data-i18n="nav.playground">Playground</button>
+      <button class="linklike" onclick="navigateTo('blog')" data-i18n="nav.blog">Blog</button>
+      <button class="linklike" onclick="navigateTo('login')" data-i18n="nav.area">Área do Aluno</button>
+      <button class="linklike" onclick="navigateTo('home');scrollToId('contato')" data-i18n="nav.contact">Contato</button>
+      <!-- Toggle de tema claro/escuro -->
+      <button class="icon-toggle" onclick="toggleTheme()" title="Alternar tema claro/escuro"><i class="fa-solid fa-circle-half-stroke" id="themeIcon"></i></button>
+      <!-- Toggle de idioma PT/EN (estrutura pronta para tradução — ver dicionário i18n no JS) -->
+      <button class="lang-toggle" onclick="toggleLang()" id="langBtn">PT</button>
+      <span class="points-pill js-points-pill" title="Seus pontos de gamificação"><i class="fa-solid fa-star"></i> 0 pts</span>
+      <!-- Checkout externo (Hotmart/Kiwify) — troque CHECKOUT_URL (definida no JS) pelo link real do seu produto -->
+      <a class="btn btn-gold btn-sm" href="#" onclick="event.preventDefault();window.open(CHECKOUT_URL,'_blank')" data-i18n="nav.buy">Comprar agora</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HOME ============ -->
+<main id="page-home" class="page active">
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="badge">17 Sprints · Do zero à Ciência de Dados</span>
+        <h1>Aprenda <span class="gold">Python para Ciência de Dados</span> do jeito que faz sentido.</h1>
+        <p class="lead">Um curso completo, em sprints práticos, com teoria acolhedora, exercícios comentados e notebooks Jupyter para você aprender fazendo — do primeiro <code>print()</code> ao seu projeto final de portfólio.</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold" href="#" onclick="event.preventDefault();window.open(CHECKOUT_URL,'_blank')">Quero me inscrever — R$ 97</a>
+          <button class="btn btn-outline" onclick="navigateTo('home');scrollToId('modulos')">Ver módulos do curso</button>
+        </div>
+        <div class="hero-stats">
+          <div><b>17</b><span>Sprints temáticos</span></div>
+          <div><b>100+</b><span>Capítulos práticos</span></div>
+          <div><b>300+</b><span>Exercícios com solução</span></div>
+          <div><b>1</b><span>Notebook Jupyter por sprint</span></div>
+        </div>
+      </div>
+      <div class="code-window">
+        <div class="bar"><span></span><span></span><span></span></div>
+        <pre><span class="c"># bem_vindo.py</span>
+<span class="k">def</span> comecar_jornada(nome):
+    <span class="s">"""Dá as boas-vindas ao futuro cientista de dados."""</span>
+    <span class="k">return</span> <span class="s">f"Olá, {nome}! Bora programar?"</span>
+
+<span class="k">print</span>(comecar_jornada(<span class="s">"você"</span>))
+<span class="c">&gt;&gt;&gt; Olá, você! Bora programar?</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vídeo de apresentação do curso (embed do YouTube — troque o ID do vídeo pelo seu) -->
+  <section style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">Conheça o curso</span>
+        <h2>Assista à apresentação</h2>
+        <p>Um vídeo curto explicando a metodologia, os sprints e o que você vai construir.</p>
+      </div>
+      <div class="video-wrap" style="max-width:820px;margin:0 auto;" data-aos="fade-up">
+        <!-- Placeholder: substitua "dQw4w9WgXcQ" pelo ID real do vídeo de apresentação -->
+        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Apresentação do curso PyData Academy" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section id="modulos">
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">Grade curricular</span>
+        <h2>Os 17 Sprints do curso</h2>
+        <p>Clique em qualquer módulo para ver os capítulos, a teoria, os exercícios e o quiz de revisão.</p>
+      </div>
+      <div class="module-grid" id="moduleGrid"></div>
+
+      <h3 class="extra-title">Módulos adicionais</h3>
+      <div class="module-grid" id="extraModuleGrid" style="margin-top:20px;"></div>
+
+      <div class="jupyter-box">
+        <div class="emoji">📓</div>
+        <div class="txt">
+          <h4>Pratique no Jupyter Notebook</h4>
+          <p>Sprints 1 (5 notebooks, um por aula) e 2 (notebook completo) já estão disponíveis, com exercícios, quiz e gabarito. Os demais sprints têm objetivos e projeto integrador já especificados no índice do curso.</p>
+        </div>
+        <a class="btn btn-gold btn-sm" href="sprint1_exercicios.ipynb" download>Baixar Sprint 1</a>
+        <a class="btn btn-outline btn-sm" href="sprint2_exercicios.ipynb" download>Baixar Sprint 2</a>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:rgba(255,255,255,.02);">
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">Para quem é</span>
+        <h2>Feito para quem quer começar de verdade</h2>
+      </div>
+      <div class="audience-grid">
+        <div class="audience-card"><div class="ico">🌱</div><h3>Iniciantes completos</h3><p>Nunca escreveu uma linha de código? Começamos do absoluto zero, com analogias do dia a dia.</p></div>
+        <div class="audience-card"><div class="ico">🔄</div><h3>Quem migra de carreira</h3><p>Profissionais de outras áreas que querem transição estruturada para dados, com projetos de portfólio.</p></div>
+        <div class="audience-card"><div class="ico">🎓</div><h3>Estudantes de exatas</h3><p>Quer aprofundar estatística, álgebra linear e machine learning aplicados de forma prática.</p></div>
+        <div class="audience-card"><div class="ico">🧠</div><h3>Autodidatas</h3><p>Já estudou sozinho mas quer uma trilha organizada em sprints, com exercícios e correção.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">Depoimentos</span>
+        <h2>Quem já trilhou o caminho</h2>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p>"Eu era analista financeira e hoje trabalho como cientista de dados júnior. Os sprints me deram ritmo e os exercícios comentados foram essenciais para eu não travar sozinha."</p>
+          <div class="who"><div class="avatar">JR</div><div><b>Juliana Ramos</b><span>Ex-Analista Financeira</span></div></div>
+        </div>
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p>"O que mais gostei foi a estrutura: teoria curta, exemplo comentado, exercício, quiz. Nunca fiquei perdido sobre o que estudar em seguida."</p>
+          <div class="who"><div class="avatar">MV</div><div><b>Marcos Vinícius</b><span>Estudante de Engenharia</span></div></div>
+        </div>
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p>"Estudo à noite, depois que meus filhos dormem. O ritmo em sprints, no meu tempo, foi o que me permitiu terminar o curso sem desistir."</p>
+          <div class="who"><div class="avatar">FC</div><div><b>Fernanda Costa</b><span>Autodidata</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabela de preços -->
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">Investimento</span>
+        <h2>Escolha seu plano</h2>
+        <p>Acesso aos 17 sprints, notebooks Jupyter, playground, assistente de IA e certificado. Pagamento processado com segurança via Hotmart/Kiwify.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card featured" data-aos="fade-up">
+          <span class="badge" style="width:fit-content;">🔥 Lançamento</span>
+          <h3 style="margin-top:14px;">Curso completo</h3>
+          <div class="price">R$ 97<span>preço de lançamento</span></div>
+          <p style="font-size:.8rem;text-decoration:line-through;margin:-6px 0 6px;">De R$ 297</p>
+          <ul>
+            <li><i class="fa-solid fa-check"></i>Acesso a todos os 17 sprints</li>
+            <li><i class="fa-solid fa-check"></i>Notebooks Jupyter + Playground + Colab/Binder</li>
+            <li><i class="fa-solid fa-check"></i>Kira, sua mentora de IA 24h</li>
+            <li><i class="fa-solid fa-check"></i>Correção automática de exercícios</li>
+            <li><i class="fa-solid fa-check"></i>Certificado ao final de cada sprint</li>
+            <li><i class="fa-solid fa-check"></i>Acesso vitalício ao conteúdo</li>
+          </ul>
+          <a class="btn btn-gold" href="#" onclick="event.preventDefault();window.open(CHECKOUT_URL,'_blank')">Comprar agora — R$ 97</a>
+        </div>
+        <div class="price-card" data-aos="fade-up" data-aos-delay="80">
+          <span class="badge" style="width:fit-content;">Preço normal</span>
+          <h3 style="margin-top:14px;">Curso completo</h3>
+          <div class="price">R$ 297<span>preço cheio</span></div>
+          <ul>
+            <li><i class="fa-solid fa-check"></i>Mesmo conteúdo do plano de lançamento</li>
+            <li><i class="fa-solid fa-check"></i>Válido após o fim da promoção</li>
+            <li><i class="fa-solid fa-check"></i>Acesso vitalício ao conteúdo</li>
+          </ul>
+          <a class="btn btn-outline" href="#" onclick="event.preventDefault();window.open(CHECKOUT_URL,'_blank')">Comprar por R$ 297</a>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:.82rem;margin-top:18px;">Prefere ser contatado antes de decidir? <a href="#" onclick="event.preventDefault();navigateTo('checkout')">Fale conosco pelo formulário</a>.</p>
+
+      <div class="guarantee-box" style="margin-top:34px;" data-aos="fade-up">
+        <i class="fa-solid fa-shield-halved"></i>
+        <div>
+          <h3 style="margin:0 0 6px;">Garantia incondicional de 15 dias</h3>
+          <p style="margin:0;">Se em até 15 dias você sentir que o curso não é para você, devolvemos 100% do valor pago, sem perguntas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:rgba(255,255,255,.02);">
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">FAQ</span>
+        <h2>Perguntas frequentes</h2>
+      </div>
+      <div style="max-width:760px;margin:0 auto;">
+        <details class="acc"><summary>Preciso saber programar antes de começar? <span></span></summary><div class="acc-body">Não! O Sprint 1 começa do absolutamente zero, com linguagem simples e analogias do cotidiano, evoluindo aos poucos para termos técnicos.</div></details>
+        <details class="acc"><summary>O curso é no meu ritmo (self-paced)?</summary><div class="acc-body">Sim. Assim como referências do setor de bootcamps, como a TripleTen, cada sprint pode ser concluído no seu próprio ritmo, com marcos sugeridos.</div></details>
+        <details class="acc"><summary>Recebo certificado ao concluir?</summary><div class="acc-body">Sim, um certificado de conclusão é emitido ao final do Sprint 17 (Projeto Final), quando você apresenta seu portfólio.</div></details>
+        <details class="acc"><summary>Terei suporte para tirar dúvidas?</summary><div class="acc-body">Cada sprint conta com exercícios comentados, quizzes com gabarito e notebooks Jupyter guiados para praticar as respostas das atividades.</div></details>
+        <details class="acc"><summary>Posso parcelar a inscrição?</summary><div class="acc-body">Sim, o formulário de inscrição permite escolher entre pagamento à vista ou parcelado.</div></details>
+        <details class="acc"><summary>O conteúdo prepara para o mercado de trabalho?</summary><div class="acc-body">Sim. A trilha cobre desde Python básico até Machine Learning, SQL, Álgebra Linear e um Projeto Final voltado para portfólio profissional.</div></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ SPRINT PAGE (dynamic) ============ -->
+<main id="page-sprint" class="page">
+  <div class="container sprint-header" id="sprintHeader"></div>
+  <div class="container chapter-list" id="sprintChapters"></div>
+  <div class="container" id="sprintGlossary" style="padding-bottom:60px;"></div>
+</main>
+
+<!-- ============ PLAYGROUND (console Python via Pyodide) ============ -->
+<main id="page-playground" class="page">
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">Playground</span>
+        <h2>Teste Python direto no navegador</h2>
+        <p>Powered by <b>Pyodide</b> (Python + WebAssembly) — nenhum servidor envolvido, tudo roda localmente na sua máquina.</p>
+      </div>
+      <div class="playground-box" style="max-width:820px;margin:0 auto;">
+        <textarea id="pgCode">print("Olá, PyData Academy!")
+for i in range(1, 4):
+    print("Linha", i)</textarea>
+        <div class="playground-actions">
+          <button class="btn btn-gold btn-sm" onclick="runPlayground()"><i class="fa-solid fa-play"></i> Executar</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('pgOut').textContent='';">Limpar saída</button>
+          <span class="pill-status" id="pgStatus">Pyodide ainda não carregado — será carregado no primeiro clique em Executar (~15s na primeira vez).</span>
+        </div>
+        <div class="playground-out" id="pgOut">A saída do seu código aparece aqui...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JupyterLite embutido: kernel Python completo rodando no navegador via WebAssembly,
+       carregado de uma instância pública via CDN (não requer backend nenhum). -->
+  <section style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">JupyterLite</span>
+        <h2>Prefere um notebook completo? Use o Jupyter no navegador</h2>
+        <p>O iframe abaixo carrega um kernel Python real (JupyterLite) direto no seu navegador — sem instalar nada. Se preferir, use os links de Colab/Binder disponíveis em cada capítulo do Sprint 1.</p>
+      </div>
+      <div style="max-width:960px;margin:0 auto;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35);">
+        <iframe
+          src="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1"
+          title="JupyterLite — kernel Python no navegador"
+          style="width:100%;height:520px;border:0;display:block;"
+          loading="lazy">
+        </iframe>
+      </div>
+      <p style="text-align:center;font-size:.78rem;margin-top:10px;">
+        Este é um kernel público de demonstração do projeto JupyterLite. Para produção, hospede sua própria build do JupyterLite (ex.: via GitHub Pages) e troque a URL do iframe acima.
+      </p>
+    </div>
+  </section>
+</main>
+
+<!-- ============ BLOG ============ -->
+<main id="page-blog" class="page">
+  <section>
+    <div class="container">
+      <div class="section-head">
+        <span class="badge">Blog</span>
+        <h2>Artigos sobre Python e Ciência de Dados</h2>
+      </div>
+      <div class="blog-grid">
+        <div class="blog-card">
+          <div class="meta">📅 12 mar 2026 · por Equipe PyData Academy</div>
+          <h3>5 motivos para aprender Python em 2026</h3>
+          <p>Python continua sendo a linguagem mais procurada para dados, automação e IA. Veja por que vale o investimento.</p>
+          <details class="article"><summary>Ler artigo completo</summary>
+            <div class="article-body">
+              Python segue na liderança das linguagens mais usadas em Ciência de Dados por motivos simples: sintaxe legível, comunidade enorme e um ecossistema de bibliotecas (pandas, NumPy, scikit-learn) que resolve praticamente qualquer problema de dados. Primeiro, a curva de aprendizado é suave — dá para escrever código útil já na primeira semana. Segundo, o mercado de trabalho continua aquecido: empresas de todos os portes usam Python para relatórios, automações e modelos preditivos. Terceiro, a linguagem é a porta de entrada natural para Machine Learning, já que frameworks como scikit-learn, TensorFlow e PyTorch são construídos em Python. Quarto, existe uma comunidade gigante — qualquer dúvida provavelmente já foi respondida em fóruns e documentações. Por fim, Python não serve só para dados: web, automação de tarefas, scripts e até jogos podem ser feitos com a mesma linguagem que você está aprendendo agora. Aprender Python hoje é investir em uma habilidade que atravessa áreas inteiras da tecnologia.
+            </div>
+          </details>
+        </div>
+        <div class="blog-card">
+          <div class="meta">📅 28 mar 2026 · por Equipe PyData Academy</div>
+          <h3>Python vs R: qual escolher para Ciência de Dados?</h3>
+          <p>As duas linguagens são ótimas para análise de dados, mas servem propósitos diferentes. Entenda as diferenças.</p>
+          <details class="article"><summary>Ler artigo completo</summary>
+            <div class="article-body">
+              Python e R são, hoje, as duas linguagens mais associadas à Ciência de Dados — e a boa notícia é que você provavelmente não precisa escolher só uma para sempre. R nasceu dentro da estatística acadêmica e brilha em análises estatísticas muito específicas e visualizações exploratórias rápidas, sendo comum em pesquisa e academia. Python, por outro lado, é uma linguagem de propósito geral: além de análise de dados, serve para construir APIs, automatizar processos e colocar modelos de Machine Learning em produção. Para quem quer uma carreira ampla — que pode incluir dados, backend, automação ou IA — Python tende a abrir mais portas, justamente por essa versatilidade. Além disso, o mercado de vagas de Ciência de Dados no Brasil e no mundo pede Python com muito mais frequência do que R. Isso não torna R inútil: em times fortemente orientados à estatística, ele continua relevante. Mas, se você está começando agora e quer uma linguagem só, Python é a escolha mais segura e versátil.
+            </div>
+          </details>
+        </div>
+        <div class="blog-card">
+          <div class="meta">📅 15 abr 2026 · por Equipe PyData Academy</div>
+          <h3>Como montar seu primeiro projeto de portfólio em Python</h3>
+          <p>Um portfólio bem construído vale mais que dez certificados. Veja o passo a passo para montar o seu.</p>
+          <details class="article"><summary>Ler artigo completo</summary>
+            <div class="article-body">
+              Um portfólio de dados não precisa ser complicado — precisa mostrar como você pensa. Comece escolhendo um problema real e específico: "quais fatores influenciam o preço de imóveis em uma cidade" é melhor do que "analisar um dataset qualquer". Depois, documente o caminho: como você coletou ou encontrou os dados, quais decisões de limpeza tomou e por quê, e quais perguntas você tentou responder. Use um notebook Jupyter para contar essa história com código, gráficos e texto juntos — é exatamente o formato que você vai praticar em cada sprint deste curso. Inclua pelo menos um gráfico bem legendado e uma conclusão clara em linguagem simples, sem jargão desnecessário. Publique o projeto no GitHub com um README explicando o objetivo, os dados usados e os principais achados. Por fim, escolha qualidade em vez de quantidade: três projetos bem explicados valem mais do que dez projetos rasos. O Projeto Final do Sprint 17 deste curso foi desenhado exatamente para virar a peça central do seu portfólio.
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ LOGIN ============ -->
+<main id="page-login" class="page">
+  <section>
+    <div class="container">
+      <div class="section-head"><span class="badge">Acesso ao curso</span><h2>Entrar na plataforma</h2><p>Login simulado (front-end + localStorage) — seu nome e progresso ficam salvos apenas no seu navegador.</p></div>
+      <div class="form-wrap">
+        <form id="loginForm" onsubmit="return handleLogin(event)">
+          <label>Nome completo</label>
+          <input type="text" name="nome" required placeholder="Seu nome">
+          <label>E-mail</label>
+          <input type="email" name="email" required placeholder="voce@email.com">
+          <label>Senha</label>
+          <input type="password" required placeholder="••••••••">
+          <button class="btn btn-gold" style="width:100%;margin-top:22px;" type="submit">Entrar / Cadastrar</button>
+        </form>
+        <div class="form-msg" id="loginMsg"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ MINHA ÁREA (após login simulado) ============ -->
+<main id="page-area" class="page">
+  <section>
+    <div class="container">
+      <div class="section-head"><span class="badge">Minha área</span><h2>Seu progresso no curso</h2><p>Tudo salvo em localStorage, direto no seu navegador — sem servidor.</p></div>
+
+      <div id="areaProfile" style="margin-bottom:22px;"></div>
+
+      <div id="areaBanner"></div>
+
+      <h3 style="margin-top:10px;">🗂️ Seus sprints</h3>
+      <p style="font-size:.82rem;color:var(--text-dim);margin-top:-6px;margin-bottom:16px;">Cada sprint libera quando você conclui 100% dos capítulos do sprint anterior — no seu ritmo, dedicando ~15-20h por semana.</p>
+      <div id="areaProgress"></div>
+
+      <h3 style="margin-top:36px;">🏅 Badges e conquistas</h3>
+      <div class="badge-grid" id="areaBadges"></div>
+
+      <h3 style="margin-top:36px;">🏆 Ranking (local)</h3>
+      <div id="areaRanking"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ CHECKOUT ============ -->
+<main id="page-checkout" class="page">
+  <section>
+    <div class="container">
+      <div class="section-head"><span class="badge">Inscrição</span><h2>Garanta sua vaga</h2><p>Preencha o formulário abaixo para se inscrever no curso completo (17 Sprints).</p></div>
+      <div class="form-wrap">
+        <form id="checkoutForm" onsubmit="return handleCheckout(event)">
+          <label>Nome completo</label>
+          <input type="text" required placeholder="Seu nome">
+          <label>E-mail</label>
+          <input type="email" required placeholder="voce@email.com">
+          <label>Telefone</label>
+          <input type="tel" required placeholder="(00) 00000-0000">
+          <label>Plano</label>
+          <div class="plan-opt"><input type="radio" name="plano" checked> À vista — 12x sem juros (equivalente)</div>
+          <div class="plan-opt"><input type="radio" name="plano"> Parcelado — até 18x</div>
+          <button class="btn btn-gold" style="width:100%;margin-top:22px;" type="submit">Confirmar inscrição</button>
+        </form>
+        <div class="form-msg" id="checkoutMsg"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contato">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:10px;">🐍PyData <span>Academy</span></div>
+        <p style="max-width:320px;font-size:.88rem;">Curso completo de Python para Ciência de Dados, em 17 sprints práticos — metodologia inspirada em bootcamps de referência do setor, como a TripleTen.</p>
+        <!-- Newsletter (formulário simulado, front-end apenas) -->
+        <h4 style="margin-top:22px;">Newsletter</h4>
+        <p style="font-size:.82rem;margin-bottom:0;">Receba novidades do curso e dicas de Python.</p>
+        <form class="newsletter-row" onsubmit="return handleNewsletter(event)">
+          <input type="email" required placeholder="seu@email.com">
+          <button class="btn btn-gold btn-sm" type="submit">Inscrever</button>
+        </form>
+        <div class="form-msg" id="newsletterMsg" style="max-width:320px;"></div>
+      </div>
+      <div><h4>Curso</h4><ul id="footerModules"></ul></div>
+      <div><h4>Contato</h4><ul>
+        <li><a href="mailto:contato@pydata.academy"><i class="fa-solid fa-envelope"></i> contato@pydata.academy</a></li>
+        <li><a href="#" onclick="return false;"><i class="fa-solid fa-phone"></i> +55 (11) 99999-0000</a></li>
+        <li><a href="#" onclick="return false;"><i class="fa-solid fa-comments"></i> Fale conosco</a></li>
+      </ul></div>
+      <div><h4>Redes sociais</h4><ul>
+        <li><a href="#" onclick="return false;"><i class="fa-brands fa-instagram"></i> Instagram</a></li>
+        <li><a href="#" onclick="return false;"><i class="fa-brands fa-linkedin"></i> LinkedIn</a></li>
+        <li><a href="#" onclick="return false;"><i class="fa-brands fa-youtube"></i> YouTube</a></li>
+        <li><a href="#" onclick="return false;"><i class="fa-brands fa-github"></i> GitHub</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">© 2026 PyData Academy. Todos os direitos reservados. Site demonstrativo criado para fins educacionais.</div>
+  </div>
+</footer>
+
+<!-- ===== KIRA — mentora de IA — ícone flutuante + janela de chat =====
+     Ver bloco JS "ASSISTENTE IA — KIRA" para a lógica completa (system prompt
+     socrático contextual, chamada à API da OpenAI e histórico salvo em localStorage). -->
+<button id="aiFab" onclick="toggleChat()" title="Conversar com a Kira"><i class="fa-solid fa-robot"></i></button>
+<div id="aiChatWindow">
+  <div class="ai-chat-head">
+    <div class="ai-chat-head-id">
+      <span class="ai-avatar">🤖</span>
+      <div>
+        <b>Kira</b>
+        <small>Sua mentora de código · online</small>
+      </div>
+    </div>
+    <button onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="ai-chat-body" id="aiChatBody"></div>
+  <details class="ai-settings">
+    <summary>⚙️ Configurar chave da API OpenAI</summary>
+    <label style="display:block;margin-top:6px;">Sua chave (fica apenas no seu navegador — localStorage):</label>
+    <input type="password" id="aiApiKey" placeholder="sk-...">
+    <button class="btn btn-gold btn-sm" style="margin-top:8px;width:100%;" onclick="saveApiKey()">Salvar chave</button>
+    <p style="margin:8px 0 0;font-size:.72rem;">⚠️ Isso é uma demo front-end: a chave é usada direto do navegador. Nunca use uma chave de produção aqui — para uso real, faça as chamadas por um backend próprio.</p>
+  </details>
+  <form class="ai-chat-input" onsubmit="return sendChatMessage(event)">
+    <textarea id="aiChatInput" placeholder="Cole seu código ou pergunte algo sobre o capítulo atual..."></textarea>
+    <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+  </form>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const sprintsData = [
+  {id:1, title:"Python Básico", desc:"Os fundamentos da linguagem: variáveis, operadores, condicionais, loops, coleções e funções.",
+    chapters:["Primeiros Passos com Python","Variáveis e Tipos de Dados","Operadores","Entrada e Saída de Dados","Estruturas Condicionais","Estruturas de Repetição","Strings e Manipulação de Texto","Listas, Tuplas e Dicionários","Funções"]},
+  {id:2, title:"Continuação de Python Básico", desc:"Aprofundando a linguagem com list comprehensions, exceções, módulos e POO inicial.",
+    chapters:["Compreensão de Listas (List Comprehensions)","Manipulação Avançada de Strings","Tratamento de Exceções (try/except)","Módulos e Pacotes","Trabalhando com Arquivos","Programação Orientada a Objetos I","Projeto Prático: Consolidando o Básico"]},
+  {id:3, title:"Manipulação de Dados", desc:"NumPy, Pandas e as ferramentas essenciais para limpar, transformar e visualizar dados.",
+    chapters:["Introdução ao NumPy","Introdução ao Pandas","Leitura e Escrita de Arquivos (CSV, Excel, JSON)","Limpeza de Dados","Filtragem e Agrupamento de Dados","Junção de Tabelas (merge, join, concat)","Visualização de Dados com Matplotlib"]},
+  {id:4, title:"Análise Estatística de Dados", desc:"Estatística descritiva, distribuições, testes de hipótese e intervalos de confiança.",
+    chapters:["Estatística Descritiva","Distribuições de Probabilidade","Testes de Hipóteses","Correlação e Covariância","Amostragem e Intervalos de Confiança","Projeto de Análise Estatística"]},
+  {id:5, title:"Ferramentas de Desenvolvimento de Software", desc:"Git, ambientes virtuais, boas práticas, testes automatizados e APIs.",
+    chapters:["Controle de Versão com Git e GitHub","Ambientes Virtuais","Boas Práticas e PEP 8","Testes Automatizados com Pytest","Depuração (Debugging)","Documentação de Código","Linha de Comando (Terminal)","Trabalhando com APIs"]},
+  {id:6, title:"Projeto Integrado 1", desc:"Aplique tudo o que aprendeu até aqui em um projeto de análise de dados de ponta a ponta.",
+    chapters:["Definição do Problema","Coleta e Preparação dos Dados","Análise Exploratória","Construção de Relatório","Apresentação do Projeto"]},
+  {id:7, title:"Coleta e Armazenamento de Dados (SQL)", desc:"Bancos relacionais, consultas SQL, agregações, joins e integração com Python.",
+    chapters:["Introdução a Bancos de Dados Relacionais","Consultas Básicas em SQL (SELECT)","Filtros e Ordenação (WHERE, ORDER BY)","Agregações (GROUP BY, HAVING)","JOINs entre Tabelas","Subconsultas","Conectando Python ao SQL","Projeto: Extraindo Insights com SQL"]},
+  {id:8, title:"Introdução ao Aprendizado Automático", desc:"Conceitos fundamentais de Machine Learning e primeiros modelos com scikit-learn.",
+    chapters:["O que é Machine Learning?","Tipos de Aprendizado","Preparação de Dados para Modelos","Métricas de Avaliação","Overfitting e Underfitting","Introdução ao Scikit-learn","Projeto: Primeiro Modelo Preditivo"]},
+  {id:9, title:"Aprendizado Supervisionado", desc:"Regressão, classificação, árvores, florestas aleatórias, SVM e validação cruzada.",
+    chapters:["Regressão Linear","Regressão Logística","Árvores de Decisão","Florestas Aleatórias (Random Forest)","Máquinas de Vetores de Suporte (SVM)","Validação Cruzada","Ajuste de Hiperparâmetros","Projeto: Comparando Modelos Supervisionados"]},
+  {id:10, title:"Aprendizado Automático para os Negócios", desc:"Aplicações de ML em contextos de negócio: churn, crédito, segmentação e receita.",
+    chapters:["ML Aplicado a Problemas de Negócio","Segmentação de Clientes","Previsão de Churn","Análise de Risco de Crédito","Otimização de Receita","Comunicação de Resultados para Stakeholders","Projeto: Caso de Negócio com ML"]},
+  {id:11, title:"Álgebra Linear", desc:"Vetores, matrizes, determinantes, sistemas lineares e autovalores aplicados a ML.",
+    chapters:["Vetores","Matrizes e Operações","Determinantes","Sistemas Lineares","Autovalores e Autovetores","Espaços Vetoriais","Aplicações em Machine Learning"]},
+  {id:12, title:"Métodos Numéricos", desc:"Interpolação, integração, resolução de equações e otimização numérica.",
+    chapters:["Introdução aos Métodos Numéricos","Interpolação","Diferenciação Numérica","Integração Numérica","Resolução de Equações Não Lineares","Otimização Numérica","Gradiente Descendente","Projeto: Otimização Aplicada"]},
+  {id:13, title:"Séries Temporais", desc:"Decomposição, modelos ARIMA e previsão de séries temporais.",
+    chapters:["Fundamentos de Séries Temporais","Decomposição de Séries Temporais","Modelos ARIMA","Previsão com Séries Temporais","Projeto: Previsão de Demanda"]},
+  {id:14, title:"Aprendizado Automático para Textos", desc:"Processamento de linguagem natural, vetorização e classificação de texto.",
+    chapters:["Introdução ao Processamento de Linguagem Natural","Pré-processamento de Texto","Vetorização (Bag of Words, TF-IDF)","Classificação de Texto","Projeto: Análise de Sentimentos"]},
+  {id:15, title:"Visão Computacional", desc:"Processamento de imagens, redes neurais convolucionais e detecção de objetos.",
+    chapters:["Fundamentos de Imagens Digitais","Processamento de Imagens com OpenCV","Redes Neurais Convolucionais (CNNs)","Classificação de Imagens","Detecção de Objetos","Projeto: Classificador de Imagens"]},
+  {id:16, title:"Aprendizado Não Supervisionado", desc:"Clusterização e redução de dimensionalidade.",
+    chapters:["Clusterização com K-Means","Clusterização Hierárquica","Redução de Dimensionalidade (PCA)","Projeto: Segmentação sem Rótulos"]},
+  {id:17, title:"Projeto Final", desc:"Planeje, desenvolva e apresente seu projeto de portfólio em Ciência de Dados.",
+    chapters:["Definição e Planejamento do Projeto Final","Desenvolvimento e Modelagem","Apresentação e Portfólio"]},
+];
+
+const extraModules = [
+  {title:"Curso Demonstrativo", desc:"Uma prévia gratuita da plataforma e da metodologia do curso.", chapters:["Bem-vindo à PyData Academy","Como Funciona a Plataforma","Primeiro Contato com Python","Explorando um Dataset","Criando seu Primeiro Gráfico","Próximos Passos"]},
+  {title:"É bom ver você por aqui!", desc:"Onboarding completo: comunidade, mentoria e organização de estudos.", chapters:["Boas-vindas","Conhecendo a Plataforma","Como Funcionam os Sprints","Comunidade e Suporte","Mentoria e Code Review","Definindo Metas de Estudo","Gestão de Tempo","Ferramentas Necessárias","Configurando seu Ambiente","Como Pedir Ajuda","Projetos e Portfólio","Networking na Comunidade","Preparação para o Mercado de Trabalho","Certificações e Conquistas","Saúde Mental e Estudos","Perguntas Frequentes","Vamos Começar!"]},
+  {title:"Excel: Trabalhando com Dados", desc:"Fundamentos de planilhas para quem também usa Excel no dia a dia.", chapters:["Fundamentos do Excel","Fórmulas e Funções","Tabelas Dinâmicas e Gráficos"]},
+  {title:"Sandbox", desc:"Um ambiente livre para praticar sem medo de errar.", chapters:["Ambiente de Testes Livre","Praticando sem Medo de Errar"]},
+  {title:"Introdução ao HTML, CSS", desc:"Fundamentos de front-end para quem quer publicar seus projetos de dados na web.", chapters:["Estrutura Básica do HTML","Estilizando com CSS","Layout Responsivo"]},
+  {title:"Ética & LGPD em Dados", desc:"Privacidade, viés algorítmico e a Lei Geral de Proteção de Dados aplicados à Ciência de Dados.", chapters:["Introdução à Ética em Dados","A LGPD na Prática","Viés e Discriminação Algorítmica","Anonimização de Dados","Estudos de Caso"]},
+  {title:"Cloud (AWS/GCP)", desc:"Fundamentos de nuvem para armazenar, processar e servir dados e modelos em escala.", chapters:["Introdução à Computação em Nuvem","Armazenamento na Nuvem (S3/Cloud Storage)","Processamento de Dados na Nuvem","Deploy de Modelos na Nuvem"]},
+  {title:"MLOps", desc:"Práticas para levar modelos de Machine Learning para produção de forma confiável.", chapters:["Ciclo de Vida de Modelos de ML","Versionamento de Dados e Modelos","Pipelines de ML","Monitoramento de Modelos em Produção"]},
+  {title:"Soft Skills para Dados", desc:"Comunicação, storytelling com dados e trabalho em equipe para cientistas de dados.", chapters:["Storytelling com Dados","Comunicação com Stakeholders","Trabalho em Equipe e Agilidade","Gestão de Carreira em Dados"]},
+];
+
+/* ---- Sprint 1 full content ---- */
+const sprint1Content = [
+{
+  objectives:["Entender o que é Python e por que ele é tão usado em Ciência de Dados","Escrever e executar seu primeiro programa","Usar comentários para documentar o código","Conhecer o papel dos notebooks Jupyter na prática do curso"],
+  project:{title:"Cartão de boas-vindas", desc:"Crie um pequeno programa saudacao.py que imprima uma mensagem de boas-vindas personalizada com o seu nome e o nome do curso, usando pelo menos dois comentários explicando as linhas principais. Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`Pense em Python como uma receita de bolo muito bem explicada: você escreve o passo a passo em uma linguagem simples, e um "ajudante" (o interpretador Python) executa cada passo exatamente como escrito. Diferente de outras linguagens mais "engessadas", Python foi criado para ser lido quase como português ou inglês comum — por isso é uma ótima primeira linguagem.
+  <br><br>Tudo o que você escreve em Python é uma instrução. A instrução mais simples é <code>print()</code>, que exibe algo na tela. Linhas que começam com <code>#</code> são comentários: o Python simplesmente as ignora, mas elas ajudam humanos (inclusive você mesmo, no futuro) a entender o código.
+  <br><br>Ao longo deste curso, você vai praticar em dois lugares: aqui no site, lendo teoria e exemplos, e no <b>Jupyter Notebook</b> — um caderno interativo onde teoria, código e resultados convivem lado a lado. Baixe o notebook do Sprint 1 na seção de módulos para responder as atividades práticas diretamente em células de código.`,
+  code:`# Este é o nosso primeiro programa em Python
+# O comando print() exibe uma mensagem na tela
+
+print("Olá, futura cientista de dados!")  # saudação inicial
+
+# Comentários (linhas que começam com #) não são executados
+# Eles servem para explicar o código para humanos
+nome = "Ana"
+print("Bem-vinda ao curso,", nome)`,
+  exercises:[
+    {q:"Escreva um programa que imprima seu nome completo na tela.", a:`print("Maria da Silva")`},
+    {q:'Crie um comentário explicando o que faz a linha print("Python").', a:`# Este comando imprime a palavra "Python" na tela\nprint("Python")`},
+    {q:"Escreva um programa que imprima três frases diferentes, cada uma em uma linha.", a:`print("Estou aprendendo Python.")\nprint("Isso é mais fácil do que eu pensava.")\nprint("Vamos para o próximo capítulo!")`},
+    {q:"Use print() para exibir a tabuada do 2, do 2x1 até o 2x5, uma linha por vez.", a:`print("2 x 1 = 2")\nprint("2 x 2 = 4")\nprint("2 x 3 = 6")\nprint("2 x 4 = 8")\nprint("2 x 5 = 10")`},
+    {q:'Encontre e corrija o erro no código: print("Olá)', a:`# Faltava a aspa de fechamento da string\nprint("Olá")`},
+    {q:"Descubra qual comando de terminal mostra a versão do Python instalada (não é um comando Python, e sim do terminal).", a:`# No terminal (fora do Python), digite:\n# python --version\n# ou, em alguns sistemas:\n# python3 --version`},
+  ],
+  quiz:[
+    {q:"O que a função print() faz em Python?", opts:["Apaga uma variável","Exibe uma mensagem na tela","Cria um arquivo","Fecha o programa"], correct:1, exp:"print() exibe (imprime) um valor ou mensagem na tela."},
+    {q:"Como se inicia um comentário de uma linha em Python?", opts:["//","<!--","#","/*"], correct:2, exp:"Comentários de uma linha começam com #."},
+    {q:"Qual extensão de arquivo é usada para salvar um programa Python?", opts:[".py",".java",".doc",".exe"], correct:0, exp:"Arquivos Python usam a extensão .py."},
+  ]
+},
+{
+  objectives:["Entender variáveis como 'caixas rotuladas' de valores","Conhecer os tipos int, float, str e bool","Usar a função type()","Converter valores entre tipos (casting)"],
+  project:{title:"Mini cadastro de perfil", desc:"Declare variáveis para nome, idade, cidade e é_estudante (bool) e imprima um resumo formatado, mostrando também o type() de cada uma. Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`Uma variável é como uma caixa com etiqueta: você guarda um valor dentro dela e usa o nome da etiqueta para acessá-lo depois. Em Python, você não precisa avisar antecipadamente o que vai guardar — basta atribuir com o sinal <code>=</code>.
+  <br><br>Cada valor tem um <b>tipo</b>: números inteiros são <code>int</code>, números com casas decimais são <code>float</code>, textos são <code>str</code> (string) e valores de verdadeiro/falso são <code>bool</code>. A função <code>type()</code> revela o tipo de qualquer valor.
+  <br><br>Às vezes precisamos converter um tipo em outro — por exemplo, transformar o texto "25" no número 25 para poder somar. Isso se chama <b>casting</b>, feito com funções como <code>int()</code>, <code>float()</code> e <code>str()</code>.`,
+  code:`idade = 25           # int - número inteiro
+altura = 1.68         # float - número decimal
+nome = "Carla"        # str - texto
+estudante = True      # bool - verdadeiro/falso
+
+print(type(idade), type(altura), type(nome), type(estudante))
+
+# Convertendo tipos (casting)
+idade_texto = str(idade)
+nota_texto = "9.5"
+nota_numero = float(nota_texto)
+print("Nota como número:", nota_numero)`,
+  exercises:[
+    {q:"Crie variáveis para nome, idade e cidade, e imprima uma frase usando as três.", a:`nome = "Pedro"\nidade = 30\ncidade = "Curitiba"\nprint(nome, "tem", idade, "anos e mora em", cidade)`},
+    {q:'Use type() para descobrir o tipo de 3.14, "10" e True.', a:`print(type(3.14))\nprint(type("10"))\nprint(type(True))`},
+    {q:'Converta a string "42" para inteiro e some 8.', a:`numero = int("42")\nprint(numero + 8)`},
+    {q:"Crie variáveis peso e altura e calcule o IMC (peso / altura ** 2).", a:`peso = 68\naltura = 1.70\nimc = peso / altura ** 2\nprint(imc)`},
+    {q:'Explique e corrija o erro: idade = "25" + 5', a:`# Erro: não é possível somar string com int diretamente\nidade = int("25") + 5\nprint(idade)`},
+    {q:"Troque os valores de duas variáveis a e b sem usar uma terceira variável.", a:`a = 1\nb = 2\na, b = b, a\nprint(a, b)`},
+  ],
+  quiz:[
+    {q:"Qual tipo representa números decimais em Python?", opts:["int","float","str","bool"], correct:1, exp:"float representa números com casas decimais."},
+    {q:"O que a função type() retorna?", opts:["O valor da variável","O tipo de dado da variável","O tamanho da variável","O nome da variável"], correct:1, exp:"type() retorna o tipo do dado armazenado."},
+    {q:'Qual é o resultado de int("7") + 3?', opts:['"73"',"10","Erro","7.3"], correct:1, exp:'int("7") converte para o número 7, e 7 + 3 = 10.'},
+  ]
+},
+{
+  objectives:["Usar operadores aritméticos, de comparação e lógicos","Entender divisão inteira e módulo","Combinar condições com and, or e not"],
+  project:{title:"Calculadora de IMC com diagnóstico", desc:"Crie uma calculadora de IMC que, usando operadores de comparação, informe se o resultado está na faixa considerada saudável (18.5 a 24.9). Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`Operadores são as ferramentas da caixa de ferramentas do Python. Os <b>aritméticos</b> (<code>+ - * / // % **</code>) fazem contas: soma, subtração, multiplicação, divisão, divisão inteira, resto da divisão e potência. Os <b>de comparação</b> (<code>== != &gt; &lt; &gt;= &lt;=</code>) comparam dois valores e sempre retornam <code>True</code> ou <code>False</code>. Já os <b>lógicos</b> (<code>and</code>, <code>or</code>, <code>not</code>) combinam condições, como perguntar "está frio E está chovendo?".`,
+  code:`a = 10
+b = 3
+
+print(a + b, a - b, a * b, a / b)   # aritméticos básicos
+print(a // b)    # divisão inteira -> 3
+print(a % b)     # resto da divisão (módulo) -> 1
+print(a ** b)    # potência -> 1000
+
+print(a > b, a == b, a != b)   # comparação
+
+x = True
+y = False
+print(x and y, x or y, not x)  # lógicos`,
+  exercises:[
+    {q:"Calcule o resto da divisão de 17 por 4.", a:`print(17 % 4)  # resultado: 1`},
+    {q:"Verifique se 15 é par usando o operador %.", a:`numero = 15\nprint(numero % 2 == 0)  # False, 15 é ímpar`},
+    {q:"Compare se a variável idade é maior ou igual a 18.", a:`idade = 20\nprint(idade >= 18)`},
+    {q:"Combine duas condições com and para verificar maioridade e posse de documento.", a:`idade = 20\npossui_documento = True\nprint(idade >= 18 and possui_documento)`},
+    {q:"Calcule 2 elevado a 10 usando o operador de potência.", a:`print(2 ** 10)  # 1024`},
+    {q:"Escreva uma expressão que retorne True se um número for maior que 0 e menor que 100.", a:`numero = 42\nprint(numero > 0 and numero < 100)`},
+  ],
+  quiz:[
+    {q:"O que o operador % retorna?", opts:["A divisão exata","O resto da divisão","A potência","A raiz quadrada"], correct:1, exp:"% (módulo) retorna o resto de uma divisão."},
+    {q:'Qual operador representa "E lógico" em Python?', opts:["or","not","and","&&"], correct:2, exp:"and é o operador lógico 'E' em Python."},
+    {q:"Qual o resultado de 7 // 2?", opts:["3.5","3","4","1"], correct:1, exp:"// é a divisão inteira: 7 // 2 = 3."},
+  ]
+},
+{
+  objectives:["Capturar dados digitados pelo usuário com input()","Formatar textos com f-strings","Combinar input() e print() em pequenos programas interativos"],
+  project:{title:"Cartão de apresentação interativo", desc:"Construa um pequeno programa que colete nome, idade e cidade do usuário com input(), e gere um cartão de apresentação formatado com f-strings. Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`A função <code>input()</code> pausa o programa e espera o usuário digitar algo — é como fazer uma pergunta e esperar a resposta. Importante: tudo que <code>input()</code> recebe vem como <b>texto</b> (string), mesmo que a pessoa digite um número. Por isso, muitas vezes precisamos converter com <code>int()</code> ou <code>float()</code>.
+  <br><br>Para exibir variáveis dentro de frases de forma organizada, usamos <b>f-strings</b>: basta colocar um <code>f</code> antes das aspas e escrever a variável entre chaves <code>{ }</code>.`,
+  code:`nome = input("Qual é o seu nome? ")
+idade = int(input("Qual é a sua idade? "))
+
+# f-string: forma moderna de formatar textos com variáveis
+print(f"Olá, {nome}! Ano que vem você terá {idade + 1} anos.")`,
+  exercises:[
+    {q:"Peça o nome do usuário e cumprimente-o usando f-string.", a:`nome = input("Seu nome: ")\nprint(f"Olá, {nome}!")`},
+    {q:"Peça dois números e imprima a soma usando f-string.", a:`a = float(input("Primeiro número: "))\nb = float(input("Segundo número: "))\nprint(f"A soma é {a + b}")`},
+    {q:"Peça o preço de um produto e calcule 10% de desconto.", a:`preco = float(input("Preço: "))\ndesconto = preco * 0.10\nprint(f"Desconto: {desconto}")`},
+    {q:"Peça altura e peso e calcule o IMC formatado com 2 casas decimais.", a:`peso = float(input("Peso (kg): "))\naltura = float(input("Altura (m): "))\nimc = peso / altura ** 2\nprint(f"Seu IMC é {imc:.2f}")`},
+    {q:"Peça uma frase e imprima quantos caracteres ela tem.", a:`frase = input("Digite uma frase: ")\nprint(f"A frase tem {len(frase)} caracteres")`},
+    {q:"Peça o ano de nascimento e calcule a idade aproximada.", a:`ano_nascimento = int(input("Ano de nascimento: "))\nidade = 2026 - ano_nascimento\nprint(f"Você tem aproximadamente {idade} anos")`},
+  ],
+  quiz:[
+    {q:"O que a função input() sempre retorna?", opts:["Um número","Um texto (string)","Um booleano","Uma lista"], correct:1, exp:"input() sempre retorna uma string, mesmo com números digitados."},
+    {q:"Como inserir uma variável dentro de uma string com f-string?", opts:['"texto" + var','f"texto {var}"',"%s","input(var)"], correct:1, exp:'f"texto {var}" é a sintaxe de f-string.'},
+    {q:"Qual função retorna o número de caracteres de uma string?", opts:["size()","length()","len()","count()"], correct:2, exp:"len() retorna o tamanho (número de caracteres) de uma string."},
+  ]
+},
+{
+  objectives:["Usar if, elif e else para tomar decisões","Entender a ordem de avaliação das condições","Aninhar condições quando necessário"],
+  project:{title:"Classificador de faixa etária", desc:"Crie um classificador que, a partir da idade digitada pelo usuário, informe se é criança, adolescente, adulto ou idoso, usando if/elif/else. Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`Estruturas condicionais são como um semáforo ou uma bifurcação na estrada: dependendo de uma condição, o programa segue por um caminho ou por outro. O <code>if</code> testa a primeira condição; se for falsa, o <code>elif</code> ("else if") testa outra; e o <code>else</code> captura tudo que sobrou. Só o bloco da primeira condição verdadeira é executado — os demais são ignorados.`,
+  code:`nota = 7.5
+
+if nota >= 9:
+    conceito = "Excelente"
+elif nota >= 7:
+    conceito = "Bom"
+elif nota >= 5:
+    conceito = "Regular"
+else:
+    conceito = "Precisa melhorar"
+
+print(f"Seu conceito é: {conceito}")`,
+  exercises:[
+    {q:"Classifique um número como positivo, negativo ou zero.", a:`numero = -4\nif numero > 0:\n    print("Positivo")\nelif numero < 0:\n    print("Negativo")\nelse:\n    print("Zero")`},
+    {q:"Verifique se uma pessoa pode votar (idade >= 16).", a:`idade = 17\nif idade >= 16:\n    print("Pode votar")\nelse:\n    print("Ainda não pode votar")`},
+    {q:"Verifique se um número é par ou ímpar.", a:`numero = 9\nif numero % 2 == 0:\n    print("Par")\nelse:\n    print("Ímpar")`},
+    {q:"Dado o comprimento dos 3 lados de um triângulo, diga se ele é equilátero (todos iguais) ou não.", a:`a, b, c = 5, 5, 5\nif a == b == c:\n    print("Equilátero")\nelse:\n    print("Não equilátero")`},
+    {q:"Dado um ano, verifique se ele é bissexto (divisível por 4, mas não por 100, exceto se divisível por 400).", a:`ano = 2024\nif (ano % 4 == 0 and ano % 100 != 0) or (ano % 400 == 0):\n    print("Bissexto")\nelse:\n    print("Não bissexto")`},
+    {q:"Crie um mini sistema de login checando usuário e senha fixos com if/else.", a:`usuario = input("Usuário: ")\nsenha = input("Senha: ")\nif usuario == "admin" and senha == "python123":\n    print("Login realizado com sucesso")\nelse:\n    print("Usuário ou senha inválidos")`},
+  ],
+  quiz:[
+    {q:"Qual palavra-chave testa uma condição adicional após um if?", opts:["else","elif","then","case"], correct:1, exp:"elif testa uma condição extra caso a anterior seja falsa."},
+    {q:"O que acontece se nenhuma condição do if/elif for verdadeira e houver um else?", opts:["Erro","O bloco else é executado","Nada acontece","O programa para"], correct:1, exp:"Se nenhuma condição anterior for verdadeira, o else é executado."},
+    {q:'Qual símbolo representa "igual a" em comparações?', opts:["=","==","!=",":="], correct:1, exp:"== compara igualdade; = é usado para atribuição."},
+  ]
+},
+{
+  objectives:["Usar loops for e while","Utilizar a função range()","Controlar loops com break e continue"],
+  project:{title:"Calculadora de tabuada interativa", desc:"Crie um programa que use for para gerar a tabuada completa (1 a 10) de um número, e while para permitir ao usuário repetir a consulta até digitar 'sair'. Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`Loops (laços de repetição) servem para repetir uma ação várias vezes, como escovar os dentes três vezes ao dia. O <code>for</code> é ideal quando sabemos quantas vezes repetir (ou percorremos uma sequência). O <code>while</code> repete enquanto uma condição for verdadeira — útil quando não sabemos o número exato de repetições. <code>break</code> interrompe o loop imediatamente; <code>continue</code> pula para a próxima repetição.`,
+  code:`# for com range
+for i in range(1, 6):
+    print(f"Repetição número {i}")
+
+# while
+contador = 0
+while contador < 3:
+    print("Contador:", contador)
+    contador += 1
+
+# break e continue
+for numero in range(10):
+    if numero == 5:
+        break        # interrompe o loop
+    if numero % 2 == 0:
+        continue     # pula para a próxima iteração
+    print(numero)`,
+  exercises:[
+    {q:"Imprima os números de 1 a 10 usando for.", a:`for i in range(1, 11):\n    print(i)`},
+    {q:"Imprima apenas os números pares de 0 a 20.", a:`for i in range(0, 21, 2):\n    print(i)`},
+    {q:"Some todos os números de 1 a 100 usando um loop.", a:`soma = 0\nfor i in range(1, 101):\n    soma += i\nprint(soma)`},
+    {q:"Use while para imprimir uma contagem regressiva de 10 até 0.", a:`contador = 10\nwhile contador >= 0:\n    print(contador)\n    contador -= 1`},
+    {q:'Peça senhas ao usuário até que ele digite a senha correta "python123".', a:`senha = ""\nwhile senha != "python123":\n    senha = input("Digite a senha: ")\nprint("Senha correta!")`},
+    {q:"Use for e range para imprimir a tabuada de um número escolhido pelo usuário.", a:`numero = int(input("Digite um número: "))\nfor i in range(1, 11):\n    print(f"{numero} x {i} = {numero * i}")`},
+  ],
+  quiz:[
+    {q:"Qual comando interrompe totalmente um loop?", opts:["continue","break","pass","stop"], correct:1, exp:"break interrompe o loop imediatamente."},
+    {q:"O que range(1, 5) gera?", opts:["1, 2, 3, 4, 5","1, 2, 3, 4","0, 1, 2, 3, 4","2, 3, 4, 5"], correct:1, exp:"range(1, 5) gera de 1 até 4 (o limite superior não é incluído)."},
+    {q:"Quando é mais indicado usar while em vez de for?", opts:["Nunca","Quando não sabemos exatamente quantas vezes repetir","Quando queremos repetir uma lista","São sempre idênticos"], correct:1, exp:"while é ideal quando o número de repetições depende de uma condição, não de uma contagem fixa."},
+  ]
+},
+{
+  objectives:["Fatiar (slicing) strings","Usar métodos de string (upper, lower, strip, split, replace, join)","Concatenar e formatar textos"],
+  project:{title:"Verificador de senha forte", desc:"Usando métodos de string, verifique se uma senha digitada tem pelo menos 8 caracteres, uma letra maiúscula e um número. Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`Uma string pode ser vista como um colar de contas, onde cada "conta" é um caractere com uma posição (índice), começando em 0. Podemos pegar pedaços da string com fatiamento (<code>[início:fim]</code>) ou usar métodos prontos como <code>.upper()</code>, <code>.lower()</code>, <code>.strip()</code> (remove espaços das pontas), <code>.split()</code> (separa em lista) e <code>.replace()</code> (substitui trechos).`,
+  code:`frase = "  Python é incrível "
+
+print(frase.strip())          # remove espaços das pontas
+print(frase.upper())          # tudo maiúsculo
+print(frase.lower())          # tudo minúsculo
+print(frase.strip().split())  # separa em lista de palavras
+
+nome = "Maria Silva"
+print(nome[0:5])              # fatiamento: "Maria"
+print(nome.replace("Silva", "Souza"))
+print("-".join(["2026", "07", "02"]))`,
+  exercises:[
+    {q:"Dado um nome completo, imprima apenas o primeiro nome usando split().", a:`nome_completo = "João Pedro Almeida"\nprimeiro_nome = nome_completo.split()[0]\nprint(primeiro_nome)`},
+    {q:'Conte quantas vezes a letra "a" aparece em uma palavra.', a:`palavra = "banana"\nprint(palavra.count("a"))`},
+    {q:"Inverta uma string usando fatiamento.", a:`palavra = "python"\nprint(palavra[::-1])`},
+    {q:"Verifique se uma palavra é um palíndromo (lê-se igual de trás para frente).", a:`palavra = "arara"\nprint(palavra == palavra[::-1])`},
+    {q:"Substitua todos os espaços de uma frase por underscores.", a:`frase = "aprender python é ótimo"\nprint(frase.replace(" ", "_"))`},
+    {q:"Junte uma lista de palavras em uma frase separada por espaços usando join().", a:`palavras = ["Python", "é", "divertido"]\nprint(" ".join(palavras))`},
+  ],
+  quiz:[
+    {q:"Qual método remove espaços do início e fim de uma string?", opts:["trim()","strip()","clean()","remove()"], correct:1, exp:"strip() remove espaços (e outros caracteres) das extremidades."},
+    {q:'O que "python"[1:4] retorna?', opts:['"pyt"','"yth"','"python"','"ytho"'], correct:1, exp:'O fatiamento [1:4] pega os índices 1, 2 e 3: "y", "t", "h" = "yth".'},
+    {q:"Qual método divide uma string em uma lista de palavras?", opts:["split()","divide()","join()","cut()"], correct:0, exp:"split() separa uma string em uma lista, usando espaço como padrão."},
+  ]
+},
+{
+  objectives:["Diferenciar listas, tuplas e dicionários","Usar operações básicas de cada estrutura","Escolher a estrutura certa para cada situação"],
+  project:{title:"Agenda de contatos", desc:"Crie uma agenda de contatos simples usando uma lista de dicionários (nome, telefone, cidade), com um loop para listar todos os contatos formatados. Dataset opcional: <a href='https://github.com' target='_blank' rel='noopener'>contatos_exemplo.csv</a> (substitua pelo link real do seu repositório). Gabarito completo no notebook Jupyter do Sprint 1."},
+  theory:`Listas, tuplas e dicionários são formas de guardar vários valores juntos. Uma <b>lista</b> é como uma lista de compras: ordenada e editável (<code>append</code>, <code>remove</code>, <code>sort</code>). Uma <b>tupla</b> é parecida, mas imutável — como os dados de um RG, que não devem mudar depois de criados. Um <b>dicionário</b> guarda pares chave-valor, como uma agenda de contatos onde o nome (chave) leva até o telefone (valor).`,
+  code:`# Lista: coleção editável e ordenada
+frutas = ["maçã", "banana", "uva"]
+frutas.append("laranja")
+
+# Tupla: coleção ordenada e IMUTÁVEL
+coordenadas = (10.5, -23.4)
+
+# Dicionário: pares chave-valor
+aluno = {
+    "nome": "Beatriz",
+    "idade": 22,
+    "curso": "Ciência de Dados"
+}
+
+print(frutas)
+print(coordenadas)
+print(aluno["nome"], "-", aluno["curso"])
+
+aluno["idade"] = 23           # atualiza um valor
+aluno["cidade"] = "Recife"    # adiciona uma nova chave
+print(aluno)`,
+  exercises:[
+    {q:"Crie uma tupla com 3 cores e tente alterar um item — observe o erro.", a:`cores = ("azul", "dourado", "branco")\n# cores[0] = "verde"  # gera TypeError: tuplas são imutáveis`},
+    {q:"Crie um dicionário com informações de um livro (título, autor, ano) e imprima cada valor.", a:`livro = {"titulo": "Python Fluente", "autor": "Luciano Ramalho", "ano": 2015}\nprint(livro["titulo"])\nprint(livro["autor"])\nprint(livro["ano"])`},
+    {q:'Adicione uma nova chave "editora" ao dicionário do livro.', a:`livro["editora"] = "Novatec"\nprint(livro)`},
+    {q:"Verifique se a chave 'autor' existe no dicionário usando o operador in.", a:`print("autor" in livro)`},
+    {q:"Percorra um dicionário com um for, imprimindo chave e valor.", a:`for chave, valor in livro.items():\n    print(chave, ":", valor)`},
+    {q:"Crie uma lista de dicionários representando 3 alunos e imprima o nome de cada um.", a:`alunos = [\n    {"nome": "Ana"},\n    {"nome": "Bruno"},\n    {"nome": "Carla"}\n]\nfor aluno in alunos:\n    print(aluno["nome"])`},
+  ],
+  quiz:[
+    {q:"Qual estrutura é imutável (não pode ser alterada após criada)?", opts:["Lista","Tupla","Dicionário","String mutável"], correct:1, exp:"Tuplas são imutáveis: uma vez criadas, seus itens não podem ser alterados."},
+    {q:"Como acessamos um valor em um dicionário?", opts:["Pelo índice numérico","Pela chave","Sempre pelo primeiro item","Não é possível"], correct:1, exp:"Dicionários usam chaves (não índices numéricos) para acessar valores."},
+    {q:"Qual método percorre pares chave-valor de um dicionário?", opts:[".keys()",".values()",".items()",".pairs()"], correct:2, exp:".items() retorna pares (chave, valor) para iteração."},
+  ]
+},
+{
+  objectives:["Criar funções com def","Usar parâmetros e retorno (return)","Entender valores padrão de parâmetros","Compreender escopo de variáveis"],
+  project:{title:"Módulo utils.py", desc:"Refatore os projetos dos capítulos anteriores em funções reutilizáveis, criando um pequeno módulo utils.py com pelo menos 3 funções (ex: calcular_imc, classificar_idade, validar_senha). Este é o projeto de encerramento do Sprint 1 — gabarito completo no notebook Jupyter."},
+  theory:`Uma função é como uma máquina de suco: você coloca frutas (os parâmetros) e recebe um suco pronto (o retorno). Definimos funções com <code>def nome_da_funcao(parametros):</code> e usamos <code>return</code> para devolver um resultado a quem chamou a função. Parâmetros podem ter valores padrão, usados quando nenhum argumento é fornecido.`,
+  code:`def saudacao(nome, saudacao_texto="Olá"):
+    """Retorna uma saudação personalizada."""
+    return f"{saudacao_texto}, {nome}!"
+
+print(saudacao("Pedro"))
+print(saudacao("Ana", "Bom dia"))
+
+def calcular_media(notas):
+    return sum(notas) / len(notas)
+
+minhas_notas = [8, 7.5, 9, 6]
+print(f"Média: {calcular_media(minhas_notas):.2f}")`,
+  exercises:[
+    {q:"Crie uma função que receba dois números e retorne a soma.", a:`def somar(a, b):\n    return a + b\n\nprint(somar(3, 4))`},
+    {q:"Crie uma função que receba uma idade e retorne se a pessoa é maior de idade (True/False).", a:`def eh_maior_de_idade(idade):\n    return idade >= 18\n\nprint(eh_maior_de_idade(20))`},
+    {q:'Crie uma função com um parâmetro padrão (moeda="R$") que formate um preço.', a:`def formatar_preco(valor, moeda="R$"):\n    return f"{moeda} {valor:.2f}"\n\nprint(formatar_preco(49.9))`},
+    {q:"Crie uma função que receba uma lista de números e retorne o maior valor.", a:`def maior_valor(numeros):\n    return max(numeros)\n\nprint(maior_valor([4, 9, 2, 7]))`},
+    {q:"Crie uma função que conte quantas vogais existem em uma palavra.", a:`def contar_vogais(palavra):\n    vogais = "aeiouAEIOU"\n    return sum(1 for letra in palavra if letra in vogais)\n\nprint(contar_vogais("Python"))`},
+    {q:"Crie uma função que receba o raio de um círculo e retorne sua área (π ≈ 3.14159).", a:`def area_circulo(raio):\n    pi = 3.14159\n    return pi * raio ** 2\n\nprint(area_circulo(5))`},
+  ],
+  quiz:[
+    {q:"Qual palavra-chave define uma função em Python?", opts:["function","def","func","define"], correct:1, exp:"def é a palavra-chave usada para declarar funções."},
+    {q:"O que a instrução return faz?", opts:["Imprime um valor na tela","Devolve um valor para quem chamou a função","Encerra o programa","Cria uma variável global"], correct:1, exp:"return devolve um valor da função para quem a chamou."},
+    {q:"O que é um parâmetro com valor padrão?", opts:["Um parâmetro obrigatório","Um valor usado quando nenhum argumento é passado","Um erro de sintaxe","Uma variável global"], correct:1, exp:"Valores padrão são usados automaticamente quando o argumento não é informado."},
+  ]
+},
+];
+
+const sprint1Glossary = [
+  ["Variável","Nome usado para guardar um valor na memória."],
+  ["Tipo de dado","Categoria de um valor: int, float, str, bool, etc."],
+  ["Função","Bloco de código reutilizável que pode receber parâmetros e retornar um valor."],
+  ["Loop (laço)","Estrutura que repete um bloco de código várias vezes."],
+  ["Condicional","Estrutura (if/elif/else) que executa código dependendo de uma condição."],
+  ["String","Tipo de dado usado para representar texto."],
+  ["Lista","Coleção ordenada e editável de valores."],
+  ["Tupla","Coleção ordenada e imutável de valores."],
+  ["Dicionário","Coleção de pares chave-valor."],
+  ["Comentário","Texto no código, iniciado com #, ignorado pelo interpretador."],
+  ["f-string","Forma de formatar strings inserindo variáveis entre chaves { }."],
+  ["Casting","Conversão de um tipo de dado para outro (ex: str para int)."],
+];
+
+const sprint1Checklist = [
+  "Sei instalar e executar um programa Python",
+  "Sei declarar variáveis e identificar seus tipos",
+  "Sei usar operadores aritméticos, de comparação e lógicos",
+  "Sei capturar dados do usuário com input()",
+  "Sei escrever estruturas condicionais (if/elif/else)",
+  "Sei escrever loops for e while, com break e continue",
+  "Sei manipular strings (fatiamento e métodos)",
+  "Sei trabalhar com listas, tuplas e dicionários",
+  "Sei criar e usar funções com parâmetros e retorno",
+];
+
+/* ================= RENDER ================= */
+function renderModuleGrid(){
+  const grid = document.getElementById('moduleGrid');
+  grid.innerHTML = sprintsData.map(s => `
+    <div class="module-card" onclick="showSprint(${s.id})">
+      <div class="num">${s.id}</div>
+      <h3>${s.title}</h3>
+      <p>${s.desc}</p>
+      <div class="meta">${s.chapters.length} capítulos</div>
+    </div>`).join('');
+
+  const extraGrid = document.getElementById('extraModuleGrid');
+  extraGrid.innerHTML = extraModules.map((m, i) => `
+    <div class="module-card" onclick="showSprint('extra${i}')">
+      <div class="num">＋</div>
+      <h3>${m.title}</h3>
+      <p>${m.desc}</p>
+      <div class="meta">${m.chapters.length} ${m.title.includes('TripleTen') || m.title.includes('aqui') ? 'aulas' : 'capítulos'}</div>
+    </div>`).join('');
+
+  const footerList = document.getElementById('footerModules');
+  footerList.innerHTML = sprintsData.slice(0,5).map(s => `<li><a href="#" onclick="event.preventDefault();showSprint(${s.id})">Sprint ${s.id} — ${s.title}</a></li>`).join('')
+    + `<li><a href="#" onclick="event.preventDefault();navigateTo('home');scrollToId('modulos')">Ver todos os módulos</a></li>`;
+}
+
+function findModule(id){
+  if(typeof id === 'number' || /^\d+$/.test(id)){
+    return {mod: sprintsData.find(s=>s.id==id), isSprint1: Number(id)===1};
+  }
+  const idx = Number(String(id).replace('extra',''));
+  return {mod: extraModules[idx], isSprint1:false};
+}
+
+function showSprint(id){
+  const {mod, isSprint1} = findModule(id);
+  if(!mod) return;
+  navigateTo('sprint');
+
+  const isSprint2 = id === 2;
+  const isSprint3 = id === 3;
+  const isSprint4 = id === 4;
+  const isSprint5 = id === 5;
+  const isSprint6 = id === 6;
+  const isSprint7 = id === 7;
+  const isSprint8 = id === 8;
+  const isSprint9 = id === 9;
+  const isSprint10 = id === 10;
+  const isSprint11 = id === 11;
+  const isSprint12 = id === 12;
+  const isSprint13 = id === 13;
+  const isSprint14 = id === 14;
+  const isSprint15 = id === 15;
+  const isSprint16 = id === 16;
+  const isSprint17 = id === 17;
+  const isDevSprint = false;
+
+  let notebookBoxHtml = '';
+  if(isSprint1){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">📓</div><div class="txt"><h4>5 notebooks deste sprint (1 por aula)</h4><p>Responda as atividades de cada aula diretamente no notebook e confira o gabarito completo ao final. Comece pelo notebook geral ou vá aula por aula.</p></div><a class="btn btn-gold btn-sm" href="sprint1_exercicios.ipynb" download>Baixar notebook geral (9 capítulos)</a></div>
+    <div class="resource-actions" style="margin-bottom:12px;flex-wrap:wrap;">
+      <a class="res-btn" href="aula2_operadores_entrada_saida.ipynb" download><i class="fa-solid fa-book"></i> Aula 2 — Operadores e E/S</a>
+      <a class="res-btn" href="aula3_condicionais_loops.ipynb" download><i class="fa-solid fa-book"></i> Aula 3 — Condicionais e Loops</a>
+      <a class="res-btn" href="aula4_strings_estruturas.ipynb" download><i class="fa-solid fa-book"></i> Aula 4 — Strings e Estruturas</a>
+      <a class="res-btn" href="aula5_funcoes_projeto.ipynb" download><i class="fa-solid fa-book"></i> Aula 5 — Funções + Projeto Final</a>
+    </div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite (kernel no navegador)</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint1_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint1_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="https://github.com/walasy1w-source/pydata-academy/tree/main/datasets" target="_blank" rel="noopener"><i class="fa-solid fa-database"></i> Datasets do curso</a>
+    </div>
+    <!-- Links de Colab/Binder usam um repositório placeholder (walasy1w-source/pydata-academy).
+         Substitua pela URL real do seu repositório no GitHub assim que os notebooks forem publicados lá. -->`;
+  } else if(isSprint2){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">📓</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Os 7 capítulos, com 6 exercícios cada, quiz e o projeto prático de encerramento — tudo em um único notebook.</p></div><a class="btn btn-gold btn-sm" href="sprint2_exercicios.ipynb" download>Baixar sprint2_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint2_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint2_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint3){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">📓</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>NumPy, pandas, leitura/escrita de arquivos, limpeza, agrupamento, merge e visualização — 7 capítulos + projeto de análise exploratória.</p></div><a class="btn btn-gold btn-sm" href="sprint3_exercicios.ipynb" download>Baixar sprint3_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint3_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint3_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint4){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">📓</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Estatística descritiva, distribuições de probabilidade, testes de hipóteses, correlação/covariância e amostragem — 5 capítulos + projeto de análise estatística.</p></div><a class="btn btn-gold btn-sm" href="sprint4_exercicios.ipynb" download>Baixar sprint4_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint4_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint4_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint5){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">📓</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Git/GitHub, ambientes virtuais, PEP 8, testes com Pytest, depuração, documentação, terminal e APIs — 8 capítulos + projeto de configuração profissional.</p></div><a class="btn btn-gold btn-sm" href="sprint5_exercicios.ipynb" download>Baixar sprint5_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint5_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint5_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint6){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">🏆</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Um projeto de dados real, de ponta a ponta: definição do problema, coleta/limpeza, análise exploratória, relatório e apresentação — o Projeto Integrado 1 do seu portfólio.</p></div><a class="btn btn-gold btn-sm" href="sprint6_exercicios.ipynb" download>Baixar sprint6_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint6_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint6_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint7){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">🗄️</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Bancos relacionais, SELECT, WHERE/ORDER BY, GROUP BY/HAVING, JOINs, subconsultas e Python+SQL com sqlite3 — 8 capítulos + projeto de extração de insights.</p></div><a class="btn btn-gold btn-sm" href="sprint7_exercicios.ipynb" download>Baixar sprint7_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint7_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint7_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint8){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">🤖</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>O que é ML, tipos de aprendizado, preparação de dados, métricas de avaliação, overfitting e scikit-learn — 7 capítulos + projeto do primeiro modelo preditivo.</p></div><a class="btn btn-gold btn-sm" href="sprint8_exercicios.ipynb" download>Baixar sprint8_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint8_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint8_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint9){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">🌳</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Regressão linear/logística, árvores, random forest, SVM, validação cruzada e ajuste de hiperparâmetros — 8 capítulos + projeto comparando modelos.</p></div><a class="btn btn-gold btn-sm" href="sprint9_exercicios.ipynb" download>Baixar sprint9_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint9_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint9_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint10){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">💼</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>ML aplicado a negócios: segmentação de clientes, previsão de churn, risco de crédito, otimização de receita e comunicação executiva — 7 capítulos + projeto de caso de negócio.</p></div><a class="btn btn-gold btn-sm" href="sprint10_exercicios.ipynb" download>Baixar sprint10_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint10_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint10_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint11){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">📐</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Vetores, matrizes, determinantes, sistemas lineares, autovalores/autovetores e espaços vetoriais — 6 capítulos + projeto implementando regressão linear e PCA do zero com NumPy.</p></div><a class="btn btn-gold btn-sm" href="sprint11_exercicios.ipynb" download>Baixar sprint11_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint11_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint11_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint12){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">⚙️</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Interpolação, diferenciação/integração numérica, equações não lineares, otimização e gradiente descendente — 7 capítulos + projeto implementando regressão linear via gradiente descendente.</p></div><a class="btn btn-gold btn-sm" href="sprint12_exercicios.ipynb" download>Baixar sprint12_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint12_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint12_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint13){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">⏳</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Fundamentos de séries temporais, decomposição, modelos ARIMA e previsão — 4 capítulos + projeto de previsão de demanda com dados de vendas sintéticos.</p></div><a class="btn btn-gold btn-sm" href="sprint13_exercicios.ipynb" download>Baixar sprint13_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint13_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint13_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint14){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">📝</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Introdução a NLP, pré-processamento de texto, Bag of Words/TF-IDF e classificação de texto — 4 capítulos + projeto de análise de sentimentos.</p></div><a class="btn btn-gold btn-sm" href="sprint14_exercicios.ipynb" download>Baixar sprint14_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint14_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint14_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint15){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">👁️</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Fundamentos de imagens digitais, OpenCV, intuição de CNNs, classificação e detecção de objetos — 5 capítulos + projeto de classificador de imagens.</p></div><a class="btn btn-gold btn-sm" href="sprint15_exercicios.ipynb" download>Baixar sprint15_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint15_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint15_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint16){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">🧩</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>K-Means, clusterização hierárquica e PCA — 3 capítulos + projeto de segmentação de clientes sem rótulos prévios.</p></div><a class="btn btn-gold btn-sm" href="sprint16_exercicios.ipynb" download>Baixar sprint16_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint16_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint16_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isSprint17){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">🎓</div><div class="txt"><h4>Notebook completo deste sprint</h4><p>Planejamento, desenvolvimento/modelagem integrada e apresentação — 3 capítulos + template guiado do seu Projeto Final de Portfólio.</p></div><a class="btn btn-gold btn-sm" href="sprint17_exercicios.ipynb" download>Baixar sprint17_exercicios.ipynb</a></div>
+    <div class="resource-actions" style="margin-bottom:20px;">
+      <a class="res-btn" href="https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir JupyterLite</a>
+      <a class="res-btn" href="https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint17_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Google Colab</a>
+      <a class="res-btn" href="https://mybinder.org/v2/gh/walasy1w-source/pydata-academy/main?filepath=sprint17_exercicios.ipynb" target="_blank" rel="noopener"><i class="fa-solid fa-cloud"></i> Abrir no Binder</a>
+      <a class="res-btn" href="indice_sprints_2_a_17.md" target="_blank"><i class="fa-solid fa-file-lines"></i> Objetivos e descrição completa</a>
+    </div>`;
+  } else if(isDevSprint){
+    notebookBoxHtml = `
+    <div class="jupyter-box"><div class="emoji">🚧</div><div class="txt"><h4>Conteúdo em desenvolvimento</h4><p>Os capítulos abaixo já têm título e estrutura de acordeão prontos. Os objetivos de aprendizagem, a descrição completa e o projeto integrador deste sprint já estão especificados no índice do curso.</p></div><a class="btn btn-outline btn-sm" href="indice_sprints_2_a_17.md" target="_blank">Ver objetivos e projeto deste sprint</a></div>`;
+  }
+
+  document.getElementById('sprintHeader').innerHTML = `
+    <span class="badge">${typeof id === 'number' ? 'Sprint ' + id : 'Módulo adicional'}</span>
+    <h1>${mod.title}</h1>
+    <p style="max-width:640px;">${mod.desc || ''}</p>
+    ${notebookBoxHtml}
+  `;
+
+  document.getElementById('sprintChapters').innerHTML = mod.chapters.map((ch, i) => {
+    const cIndex = i + 1;
+    if(isSprint1){
+      const c = sprint1Content[i];
+      const chKey = `s1c${cIndex}`;
+      return `
+      <details class="chapter">
+        <summary><span>Capítulo ${cIndex}: ${ch}</span> <span class="points-pill" style="margin-left:10px;"><i class="fa-solid fa-star"></i> +${CHAPTER_POINTS} pts</span></summary>
+        <div class="chapter-body">
+          <h4>🎯 Objetivos de aprendizagem</h4>
+          <ul>${c.objectives.map(o=>`<li>${o}</li>`).join('')}</ul>
+          <h4>📘 Teoria</h4>
+          <p>${c.theory}</p>
+          <h4>💻 Código de exemplo</h4>
+          <pre>${escapeHtml(c.code)}</pre>
+          <div class="resource-actions">${buildResourceButtons(c.code)}</div>
+          <h4>✏️ Exercícios práticos</h4>
+          ${c.exercises.map((ex,j)=>`
+            <div class="exercise">
+              <b>Exercício ${j+1}:</b> ${ex.q}
+              <div class="resource-actions">${buildResourceButtons(ex.a)}</div>
+              <details class="solution"><summary>Ver solução comentada</summary><pre>${escapeHtml(ex.a)}</pre></details>
+            </div>`).join('')}
+          ${renderBackendCheck(cIndex)}
+          <h4>🚀 Projeto prático do capítulo</h4>
+          <div class="project-box">
+            <h4>${c.project.title}</h4>
+            <p style="margin:0;">${c.project.desc}</p>
+          </div>
+          <h4>🧩 Quiz de revisão (correção automática)</h4>
+          ${c.quiz.map((qq,k)=>{
+            const qid = `${chKey}q${k}`;
+            return `
+            <div class="quiz-q" id="${qid}">
+              <b>${k+1}. ${qq.q}</b>
+              ${qq.opts.map((o,oi)=>`
+                <label class="opt-radio"><input type="radio" name="${qid}" value="${oi}"> ${String.fromCharCode(65+oi)}) ${o}</label>`).join('')}
+              <div><button type="button" class="btn btn-outline btn-sm quiz-check-btn" onclick="checkQuiz('${qid}')">Verificar resposta</button></div>
+              <div class="quiz-feedback" id="${qid}-fb"></div>
+            </div>`;
+          }).join('')}
+          <div style="margin-top:22px;display:flex;justify-content:flex-end;">
+            <button class="mark-done-btn" id="btn-${chKey}" onclick="toggleChapterDone('${chKey}', this)"><i class="fa-regular fa-square"></i> Marcar capítulo como concluído</button>
+          </div>
+        </div>
+      </details>`;
+    }
+    const chKey = `s${id}c${cIndex}`;
+    return `
+      <details class="chapter">
+        <summary><span>Capítulo ${cIndex}: ${ch}</span> <span class="points-pill" style="margin-left:10px;"><i class="fa-solid fa-star"></i> +${CHAPTER_POINTS} pts</span></summary>
+        <div class="chapter-body">
+          <div class="placeholder-box">📓 A teoria completa deste capítulo e os exercícios comentados estão no notebook Jupyter deste sprint (baixe ou abra no JupyterLite/Colab acima). Resolva lá e volte para marcar o capítulo como concluído. Se travar em algum código, chame a <b>Kira</b> no chat 🤖 — ela te ajuda a pensar sem te dar a resposta pronta.</div>
+          <div style="margin-top:22px;display:flex;justify-content:flex-end;">
+            <button class="mark-done-btn" id="btn-${chKey}" onclick="toggleChapterDone('${chKey}', this)"><i class="fa-regular fa-square"></i> Marcar capítulo como concluído</button>
+          </div>
+        </div>
+      </details>`;
+  }).join('');
+
+  document.getElementById('sprintGlossary').innerHTML = isSprint1 ? `
+    <h3>📚 Glossário do Sprint 1</h3>
+    <div class="glossary-grid">${sprint1Glossary.map(([t,d])=>`<div class="glossary-item"><b>${t}:</b> ${d}</div>`).join('')}</div>
+    <h3 style="margin-top:34px;">✅ Checklist de revisão</h3>
+    <ul class="checklist">${sprint1Checklist.map(c=>`<li>${c}</li>`).join('')}</ul>
+  ` : `
+    <h3>📚 Glossário e ✅ Checklist de revisão</h3>
+    <div class="placeholder-box">Glossário e checklist deste módulo serão adicionados em breve.</div>
+  `;
+
+  // Contexto usado pelo assistente de IA (system prompt) e pela sincronização de progresso
+  currentContext = {sprintId: (typeof id === 'number' ? id : null), sprintTitle: mod.title, chapterTitle: mod.chapters[0] || ''};
+  syncChapterButtons(id, mod.chapters.length);
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ================= NAVIGATION ================= */
+function navigateTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('#navLinks .linklike').forEach(b=>b.classList.remove('active'));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function scrollToId(id){
+  setTimeout(()=>{ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); }, 60);
+}
+
+function handleLogin(e){
+  e.preventDefault();
+  const form = e.target;
+  const nome = form.nome.value.trim();
+  const email = form.email.value.trim();
+  const s = getState();
+  s.profile = {name: nome, email: email};
+  saveState(s);
+  document.getElementById('loginMsg').style.display='block';
+  document.getElementById('loginMsg').textContent = 'Login simulado com sucesso! Redirecionando para a sua área do curso...';
+  setTimeout(()=>{ renderArea(); navigateTo('area'); }, 700);
+  return false;
+}
+
+function handleCheckout(e){
+  e.preventDefault();
+  document.getElementById('checkoutMsg').style.display='block';
+  document.getElementById('checkoutMsg').textContent = 'Inscrição recebida com sucesso! Em breve nossa equipe entrará em contato por e-mail.';
+  return false;
+}
+
+function handleNewsletter(e){
+  e.preventDefault();
+  const msg = document.getElementById('newsletterMsg');
+  msg.style.display = 'block';
+  msg.textContent = 'Inscrição na newsletter confirmada! (formulário simulado, sem backend)';
+  e.target.reset();
+  return false;
+}
+
+/* ================================================================
+   GAMIFICAÇÃO — pontos, badges, progresso e certificado (localStorage)
+   ================================================================ */
+const CHAPTER_POINTS = 20;
+const QUIZ_POINTS = 5;
+let currentContext = {sprintId:null, sprintTitle:'', chapterTitle:''};
+
+const BADGES = [
+  {id:'first_program', name:'Primeiro Programa', icon:'fa-solid fa-flag-checkered', rule:s=>s.chaptersDone.length>=1},
+  {id:'cem_exercicios', name:'100 Exercícios', icon:'fa-solid fa-list-check', rule:s=>(s.chaptersDone.length*6 + s.quizzesCorrect + (s.backendCorrect||0))>=100},
+  {id:'projeto_final', name:'Projeto Final', icon:'fa-solid fa-medal', rule:s=>s.chaptersDone.includes('s1c9') || s.manualBadges.includes('projeto_final')},
+  {id:'sprint1_done', name:'Sprint 1 Completo', icon:'fa-solid fa-trophy', rule:s=>s.chaptersDone.filter(c=>c.startsWith('s1c')).length>=9},
+  {id:'hundred_points', name:'100 Pontos', icon:'fa-solid fa-star', rule:s=>s.points>=100},
+  {id:'quiz_master', name:'Mestre dos Quizzes', icon:'fa-solid fa-brain', rule:s=>s.quizzesCorrect>=15},
+  {id:'github_deploy', name:'Deploy no GitHub', icon:'fa-brands fa-github', rule:s=>s.manualBadges.includes('github_deploy')},
+];
+
+function getState(){
+  const def = {points:0, chaptersDone:[], quizzesCorrect:0, backendCorrect:0, manualBadges:[], profile:null, chatHistory:[]};
+  try{
+    const raw = localStorage.getItem('pydata_state');
+    return raw ? Object.assign(def, JSON.parse(raw)) : def;
+  }catch(err){ return def; }
+}
+function saveState(s){ localStorage.setItem('pydata_state', JSON.stringify(s)); refreshPointsPill(); }
+
+function refreshPointsPill(){
+  const s = getState();
+  document.querySelectorAll('.js-points-pill').forEach(el=>{
+    el.innerHTML = `<i class="fa-solid fa-star"></i> ${s.points} pts`;
+  });
+}
+
+function toggleChapterDone(chKey, btn){
+  const s = getState();
+  const idx = s.chaptersDone.indexOf(chKey);
+  if(idx === -1){
+    s.chaptersDone.push(chKey);
+    s.points += CHAPTER_POINTS;
+    btn.classList.add('done');
+    btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Capítulo concluído!';
+  } else {
+    s.chaptersDone.splice(idx,1);
+    s.points = Math.max(0, s.points - CHAPTER_POINTS);
+    btn.classList.remove('done');
+    btn.innerHTML = '<i class="fa-regular fa-square"></i> Marcar capítulo como concluído';
+  }
+  saveState(s);
+}
+
+function syncChapterButtons(sprintId, totalChapters){
+  const s = getState();
+  if(typeof sprintId !== 'number') return;
+  for(let i=1;i<=totalChapters;i++){
+    const key = 's' + sprintId + 'c' + i;
+    const btn = document.getElementById('btn-' + key);
+    if(!btn) continue;
+    if(s.chaptersDone.includes(key)){
+      btn.classList.add('done');
+      btn.innerHTML = '<i class="fa-solid fa-square-check"></i> Capítulo concluído!';
+    }
+  }
+}
+
+/* Progresso (concluídos/total) de um sprint específico, a partir do localStorage */
+function sprintProgress(sp){
+  const s = getState();
+  const total = sp.chapters.length;
+  const done = s.chaptersDone.filter(c => c.startsWith('s' + sp.id + 'c')).length;
+  return {done, total, pct: total ? Math.round((done/total)*100) : 0, isDone: total > 0 && done === total};
+}
+/* Um sprint N (N>1) fica bloqueado até o sprint N-1 estar 100% concluído — desbloqueio sequencial,
+   igual ao modelo da TripleTen (ver screenshots de referência). */
+function isSprintLocked(sp, allSprints){
+  if(sp.id <= 1) return false;
+  const prev = allSprints.find(x => x.id === sp.id - 1);
+  if(!prev) return false;
+  return !sprintProgress(prev).isDone;
+}
+
+function checkQuiz(qid){
+  // qid tem o formato s1c<capitulo>q<indice> — buscamos a pergunta direto em sprint1Content,
+  // em vez de embutir texto (com aspas) dentro do atributo onclick.
+  const m = qid.match(/^s1c(\d+)q(\d+)$/);
+  if(!m) return;
+  const chapterNum = Number(m[1]);
+  const qIndex = Number(m[2]);
+  const question = sprint1Content[chapterNum - 1].quiz[qIndex];
+  const correctIdx = question.correct;
+  const explanation = question.exp;
+
+  const chosen = document.querySelector(`input[name="${qid}"]:checked`);
+  const fb = document.getElementById(qid + '-fb');
+  if(!chosen){
+    fb.className = 'quiz-feedback bad';
+    fb.textContent = 'Selecione uma alternativa antes de verificar.';
+    return;
+  }
+  const isCorrect = Number(chosen.value) === correctIdx;
+  const s = getState();
+  if(isCorrect){
+    fb.className = 'quiz-feedback ok';
+    fb.textContent = `✅ Resposta correta! +${QUIZ_POINTS} pontos. ${explanation}`;
+    s.quizzesCorrect += 1;
+    s.points += QUIZ_POINTS;
+    saveState(s);
+  } else {
+    fb.className = 'quiz-feedback bad';
+    fb.textContent = `❌ Ainda não é essa. ${explanation}`;
+  }
+}
+
+/* ================================================================
+   CHECKOUT EXTERNO (Hotmart/Kiwify)
+   Troque pela URL real do seu produto assim que ele estiver publicado.
+   ================================================================ */
+const CHECKOUT_URL = "https://pay.hotmart.com/SEUCODIGOAQUI";
+
+/* ================================================================
+   INTEGRAÇÃO COM O BACKEND DE CORREÇÃO (Flask, ver app.py / README.md)
+   Troque BACKEND_URL pela URL real do seu serviço publicado no Render.
+   ================================================================ */
+const BACKEND_URL = "https://SEU_BACKEND.onrender.com";
+
+async function verificarExercicio(alunoId, exercicioId, codigo) {
+  const resposta = await fetch(`${BACKEND_URL}/run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ aluno_id: alunoId, exercicio_id: exercicioId, codigo: codigo }),
+  });
+  return await resposta.json();
+}
+
+// Identificador do aluno enviado ao backend: usa o e-mail do login simulado,
+// ou gera um id anônimo persistido em localStorage caso o aluno não tenha logado.
+function getAlunoId(){
+  const s = getState();
+  if(s.profile && s.profile.email) return s.profile.email;
+  let id = localStorage.getItem('pydata_aluno_id');
+  if(!id){
+    id = 'visitante_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('pydata_aluno_id', id);
+  }
+  return id;
+}
+
+// Mapeia capítulo do Sprint 1 -> exercício correspondente no backend (ver app.py).
+// Só estes 3 têm correção automática "de verdade" nesta versão de demonstração.
+const BACKEND_EXERCICIOS = {
+  3: {id: "cap3_eh_par", titulo: "Verificação automática — eh_par(n)", codigoBase: "def eh_par(n):\n    # Escreva sua resposta aqui\n    pass\n"},
+  7: {id: "cap7_inverter_string", titulo: "Verificação automática — inverter_string(s)", codigoBase: "def inverter_string(s):\n    # Escreva sua resposta aqui\n    pass\n"},
+  9: {id: "cap9_resumo_vendas", titulo: "Verificação automática — resumo_vendas(vendas)", codigoBase: "def resumo_vendas(vendas):\n    # Escreva sua resposta aqui\n    pass\n"},
+};
+
+function renderBackendCheck(cIndex){
+  const ex = BACKEND_EXERCICIOS[cIndex];
+  if(!ex) return '';
+  return `
+    <div class="project-box" style="border-color:var(--gold);margin-top:18px;">
+      <h4>🖥️ ${ex.titulo}</h4>
+      <p style="margin:0 0 10px;font-size:.85rem;">Escreva sua função abaixo e clique em "Verificar exercício" — o código roda de verdade no nosso backend Python (Flask) e é conferido com testes automáticos.</p>
+      <textarea id="backend-code-${ex.id}" style="width:100%;min-height:110px;background:#081029;color:#cfe0ff;border:1px solid var(--border);border-radius:10px;font-family:Consolas,Monaco,monospace;font-size:.84rem;padding:12px;">${ex.codigoBase}</textarea>
+      <div class="playground-actions">
+        <button type="button" class="btn btn-gold btn-sm" onclick="verificarExercicioUI('${ex.id}')"><i class="fa-solid fa-check"></i> Verificar exercício</button>
+        <span class="pill-status" id="backend-status-${ex.id}"></span>
+      </div>
+      <div class="playground-out" id="backend-result-${ex.id}" style="display:none;"></div>
+    </div>`;
+}
+
+async function verificarExercicioUI(exercicioId){
+  const textarea = document.getElementById('backend-code-' + exercicioId);
+  const statusEl = document.getElementById('backend-status-' + exercicioId);
+  const resultEl = document.getElementById('backend-result-' + exercicioId);
+  const codigo = textarea.value;
+  const alunoId = getAlunoId();
+
+  statusEl.textContent = 'Enviando para o backend...';
+  resultEl.style.display = 'none';
+
+  try{
+    const resultado = await verificarExercicio(alunoId, exercicioId, codigo);
+    resultEl.style.display = 'block';
+    if(resultado.status === 'ok'){
+      resultEl.textContent = '✅ ' + resultado.message;
+      resultEl.style.color = '#9fe6a0';
+      const pontos = resultado.pontos_ganhos || 10;
+      statusEl.textContent = `+${pontos} pontos!`;
+      const s = getState();
+      s.points += pontos;
+      s.backendCorrect = (s.backendCorrect || 0) + 1;
+      saveState(s);
+    } else {
+      resultEl.textContent = '❌ ' + resultado.message;
+      resultEl.style.color = '#f3a3a3';
+      statusEl.textContent = 'Tente novamente.';
+    }
+  }catch(err){
+    resultEl.style.display = 'block';
+    resultEl.style.color = '#f3a3a3';
+    resultEl.textContent = '⚠️ Não foi possível conectar ao backend. Confirme se BACKEND_URL (no início deste script) aponta para o seu serviço no Render — no plano free ele "dorme" e pode levar alguns segundos para responder na primeira tentativa.';
+    statusEl.textContent = '';
+  }
+}
+
+/* Botões de recursos (Jupyter / Colab / Playground) para cada bloco de código.
+   O código é passado via encodeURIComponent dentro do atributo onclick para evitar
+   qualquer problema de aspas/quebras de linha no HTML gerado dinamicamente. */
+function buildResourceButtons(code){
+  const encoded = encodeURIComponent(code);
+  // JupyterLite: instância pública de demonstração, com o kernel Python rodando via WebAssembly
+  // no navegador do aluno. O parâmetro ?code= pré-carrega o REPL com o exercício.
+  const jupyterUrl = `https://jupyterlite.github.io/demo/repl/index.html?kernel=python&toolbar=1&code=${encoded}`;
+  // Colab: aponta para um notebook hospedado no GitHub — troque "walasy1w-source/pydata-academy"
+  // pelo repositório real assim que os notebooks estiverem publicados.
+  const colabUrl = `https://colab.research.google.com/github/walasy1w-source/pydata-academy/blob/main/sprint1_exercicios.ipynb`;
+  return `
+    <a class="res-btn" href="${jupyterUrl}" target="_blank" rel="noopener"><i class="fa-solid fa-flask"></i> Abrir no Jupyter</a>
+    <a class="res-btn" href="${colabUrl}" target="_blank" rel="noopener"><i class="fa-brands fa-google"></i> Abrir no Colab</a>
+    <button type="button" class="res-btn" onclick="sendToPlayground(decodeURIComponent('${encoded}'))"><i class="fa-solid fa-play"></i> Testar no Playground</button>
+  `;
+}
+function sendToPlayground(code){
+  navigateTo('playground');
+  document.getElementById('pgCode').value = code;
+  setTimeout(runPlayground, 150);
+}
+
+/* ================================================================
+   CERTIFICADO EM PDF (jsPDF)
+   ================================================================ */
+function generateCertificate(sprintTitle){
+  if(typeof window.jspdf === 'undefined'){
+    alert('A biblioteca de PDF ainda está carregando. Tente novamente em alguns segundos.');
+    return;
+  }
+  const s = getState();
+  const name = (s.profile && s.profile.name) ? s.profile.name : 'Aluno(a) PyData Academy';
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+  doc.setFillColor(11,17,32); doc.rect(0,0,297,210,'F');
+  doc.setDrawColor(212,175,55); doc.setLineWidth(2); doc.rect(8,8,281,194);
+  doc.setTextColor(212,175,55); doc.setFontSize(30);
+  doc.text('Certificado de Conclusão', 148, 60, {align:'center'});
+  doc.setTextColor(255,255,255); doc.setFontSize(15);
+  doc.text('PyData Academy certifica que', 148, 85, {align:'center'});
+  doc.setFontSize(24); doc.setTextColor(212,175,55);
+  doc.text(name, 148, 102, {align:'center'});
+  doc.setFontSize(13); doc.setTextColor(255,255,255);
+  doc.text(`concluiu com sucesso o ${sprintTitle}`, 148, 117, {align:'center'});
+  doc.setFontSize(11); doc.setTextColor(170,180,212);
+  doc.text(`Emitido em ${new Date().toLocaleDateString('pt-BR')}`, 148, 140, {align:'center'});
+  doc.save(`certificado_${sprintTitle.replace(/[^a-zA-Z0-9]+/g,'_')}.pdf`);
+  const s2 = getState();
+  if(!s2.manualBadges.includes('cert_'+sprintTitle)) s2.manualBadges.push('cert_'+sprintTitle);
+  saveState(s2);
+}
+
+/* ================================================================
+   ÁREA DO ALUNO — perfil, progresso, badges, ranking
+   ================================================================ */
+const SPRINT_ICONS = {1:'🐍',2:'🔢',3:'🧹',4:'📈',5:'🛠️',6:'🏆',7:'🗄️',8:'🤖',9:'🌳',10:'💼',11:'📐',12:'⚙️',13:'⏳',14:'📝',15:'👁️',16:'🧩',17:'🎓'};
+
+function openSprintFromDashboard(id, locked){
+  if(locked){
+    const grid = document.getElementById('areaProgress');
+    if(grid) grid.scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
+  showSprint(id);
+}
+
+function renderArea(){
+  const s = getState();
+  const totalDone = sprintsData.filter(sp => sprintProgress(sp).isDone).length;
+  const currentSprint = sprintsData.find(sp => !isSprintLocked(sp, sprintsData) && !sprintProgress(sp).isDone) || sprintsData[sprintsData.length-1];
+
+  document.getElementById('areaProfile').innerHTML = `
+    <div class="area-row">
+      <div><b>${(s.profile && s.profile.name) || 'Visitante'}</b><br><span style="font-size:.8rem;color:var(--text-dim);">${(s.profile && s.profile.email) || 'faça login para salvar seu progresso'}</span></div>
+      <div class="points-pill js-points-pill"><i class="fa-solid fa-star"></i> ${s.points} pts</div>
+    </div>`;
+
+  document.getElementById('areaBanner').innerHTML = `
+    <div class="tt-banner">
+      <i class="fa-solid fa-bullhorn"></i>
+      <div style="flex:1;">
+        <b>${totalDone > 0 ? `Você já concluiu ${totalDone} de 17 sprints! 🎉` : 'Bem-vindo(a) à PyData Academy!'}</b>
+        <p>${totalDone > 0 ? `Continue no ${currentSprint ? 'Sprint ' + currentSprint.id + ' — ' + currentSprint.title : 'seu próximo sprint'} — sua mentora Kira está disponível 24h no chat para te ajudar a destravar qualquer exercício.` : `Comece pelo Sprint 1. Dedique de 15 a 20h por semana, no seu ritmo, e chame a Kira 🤖 sempre que travar em um código.`}</p>
+      </div>
+      <button class="close-x" onclick="this.closest('.tt-banner').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+    </div>`;
+
+  document.getElementById('areaProgress').innerHTML = `
+    <div class="tt-sprint-list">
+      ${sprintsData.map(sp=>{
+        const prog = sprintProgress(sp);
+        const locked = isSprintLocked(sp, sprintsData);
+        let statusHtml;
+        if(locked){
+          statusHtml = `<i class="fa-solid fa-lock tt-lock"></i>`;
+        } else if(prog.isDone){
+          statusHtml = `<i class="fa-solid fa-circle-check tt-done-check"></i>`;
+        } else {
+          const restantes = prog.total - prog.done;
+          statusHtml = `<div class="progress-bar"><div class="fill" style="width:${prog.pct}%;"></div></div><span class="tt-remaining">${restantes} capítulo${restantes===1?'':'s'} restante${restantes===1?'':'s'}</span>`;
+        }
+        return `
+        <div class="tt-sprint-card ${prog.isDone?'done':''} ${locked?'locked':''}" onclick="openSprintFromDashboard(${sp.id}, ${locked})">
+          <div class="tt-icon-tile">${SPRINT_ICONS[sp.id] || '📘'}</div>
+          <div class="tt-sprint-info">
+            <h4>Sprint ${sp.id} — ${sp.title}</h4>
+            <div class="tt-meta">${prog.total} capítulos${locked ? ' · bloqueado até concluir o sprint anterior' : ''}</div>
+          </div>
+          <div class="tt-sprint-status">${statusHtml}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:22px;">
+      <button class="btn btn-gold btn-sm" onclick="generateCertificate('Sprint 1 - Python Basico')" ${!sprintProgress(sprintsData[0]).isDone?'disabled style="opacity:.4;cursor:not-allowed;"':''}><i class="fa-solid fa-award"></i> Gerar certificado do Sprint 1 (PDF)</button>
+      <span style="font-size:.78rem;color:var(--text-dim);margin-left:10px;">${!sprintProgress(sprintsData[0]).isDone ? `Conclua os ${sprintsData[0].chapters.length} capítulos do Sprint 1 para liberar` : 'Certificado liberado! 🎉'}</span>
+    </div>`;
+
+  document.getElementById('areaBadges').innerHTML = BADGES.map(b=>{
+    const earned = b.rule(s);
+    return `<div class="badge-card ${earned?'earned':''}"><i class="${b.icon}"></i>${b.name}<br><span>${earned?'Conquistado ✅':'Bloqueado'}</span></div>`;
+  }).join('');
+
+  const ranking = [
+    {name:'Juliana R.', points:340},
+    {name:'Marcos V.', points:275},
+    {name:(s.profile && s.profile.name) || 'Você', points:s.points, me:true},
+    {name:'Fernanda C.', points:190},
+    {name:'Rafael T.', points:110},
+  ].sort((a,b)=>b.points-a.points);
+  document.getElementById('areaRanking').innerHTML = `
+    <table class="ranking-table"><thead><tr><th>#</th><th>Aluno(a)</th><th>Pontos</th></tr></thead><tbody>
+    ${ranking.map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}º</td><td>${r.name}</td><td>${r.points} pts</td></tr>`).join('')}
+    </tbody></table>
+    <p style="font-size:.72rem;margin-top:8px;">* Ranking ilustrativo: os demais nomes são fictícios; só a sua pontuação (linha destacada) é real, vinda do seu localStorage.</p>`;
+}
+
+/* ================================================================
+   TEMA CLARO/ESCURO E IDIOMA (PT/EN) — preferências salvas em localStorage
+   ================================================================ */
+function applyTheme(){
+  const theme = localStorage.getItem('pydata_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  const icon = document.getElementById('themeIcon');
+  if(icon) icon.className = theme === 'dark' ? 'fa-solid fa-circle-half-stroke' : 'fa-solid fa-sun';
+}
+function toggleTheme(){
+  const cur = localStorage.getItem('pydata_theme') || 'dark';
+  localStorage.setItem('pydata_theme', cur === 'dark' ? 'light' : 'dark');
+  applyTheme();
+}
+
+/* Dicionário de tradução — cobre a interface (nav, botões). A tradução completa do
+   conteúdo dos 17 sprints ainda não foi feita; a estrutura data-i18n já está pronta
+   para receber as chaves de conteúdo quando a tradução for produzida. */
+const i18nDict = {
+  pt:{'nav.home':'Início','nav.course':'Curso','nav.playground':'Playground','nav.blog':'Blog','nav.area':'Área do Aluno','nav.contact':'Contato','nav.buy':'Comprar agora'},
+  en:{'nav.home':'Home','nav.course':'Course','nav.playground':'Playground','nav.blog':'Blog','nav.area':'Student Area','nav.contact':'Contact','nav.buy':'Enroll now'}
+};
+let currentLang = localStorage.getItem('pydata_lang') || 'pt';
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(i18nDict[currentLang] && i18nDict[currentLang][key]) el.textContent = i18nDict[currentLang][key];
+  });
+  const btn = document.getElementById('langBtn');
+  if(btn) btn.textContent = currentLang.toUpperCase();
+  document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'en';
+}
+function toggleLang(){
+  currentLang = currentLang === 'pt' ? 'en' : 'pt';
+  localStorage.setItem('pydata_lang', currentLang);
+  applyLang();
+}
+
+/* ================================================================
+   PLAYGROUND — console Python via Pyodide (WebAssembly), carregado sob demanda
+   ================================================================ */
+let pyodideInstance = null;
+function loadExternalScript(src){
+  return new Promise((resolve,reject)=>{
+    const el = document.createElement('script');
+    el.src = src; el.onload = resolve; el.onerror = reject;
+    document.head.appendChild(el);
+  });
+}
+async function runPlayground(){
+  const out = document.getElementById('pgOut');
+  const status = document.getElementById('pgStatus');
+  const code = document.getElementById('pgCode').value;
+  try{
+    if(!pyodideInstance){
+      status.textContent = 'Carregando Pyodide (Python + WebAssembly)... isso pode levar alguns segundos na primeira vez.';
+      if(typeof loadPyodide === 'undefined'){
+        await loadExternalScript('https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js');
+      }
+      pyodideInstance = await loadPyodide();
+      status.textContent = 'Pyodide carregado ✅ — pronto para executar.';
+    }
+    out.textContent = 'Executando...';
+    let printed = '';
+    pyodideInstance.setStdout({batched:(s)=>{ printed += s + '\n'; }});
+    pyodideInstance.setStderr({batched:(s)=>{ printed += s + '\n'; }});
+    await pyodideInstance.runPythonAsync(code);
+    out.textContent = printed || '(o código rodou sem imprimir nada — use print() para ver a saída)';
+  }catch(err){
+    out.textContent = 'Erro ao executar: ' + err;
+  }
+}
+
+/* ================================================================
+   ASSISTENTE IA — KIRA — mentora socrática de código, chat flutuante
+   com a API da OpenAI (gpt-3.5-turbo por padrão).
+   A chave da API é fornecida pelo próprio usuário e fica salva SOMENTE no
+   localStorage do navegador dele. Isso é uma implementação de demonstração:
+   expor chaves de API no front-end não é seguro para produção — em um app
+   real, as chamadas à OpenAI devem passar por um backend que guarda a chave
+   (é exatamente esse backend que planejamos na proposta de infraestrutura).
+   ================================================================ */
+const KIRA_THINK_MARK = '@@RESPOSTA@@';
+
+function toggleChat(){
+  const w = document.getElementById('aiChatWindow');
+  w.classList.toggle('open');
+  if(w.classList.contains('open') && document.getElementById('aiChatBody').children.length === 0){
+    renderChatHistory();
+  }
+}
+function saveApiKey(){
+  const key = document.getElementById('aiApiKey').value.trim();
+  if(key){
+    localStorage.setItem('pydata_openai_key', key);
+    alert('Chave salva neste navegador (localStorage). Ela nunca é enviada para nós, apenas para a API da OpenAI.');
+  }
+}
+function buildSystemPrompt(){
+  const ctx = currentContext || {};
+  const onde = ctx.sprintId ? `Sprint ${ctx.sprintId} (${ctx.sprintTitle})` : (ctx.sprintTitle || 'a página inicial do curso');
+  return `Você é a Kira, a mentora de código de IA da PyData Academy, criada pela nossa própria equipe para acompanhar o aluno dentro da plataforma (não é a Dot da TripleTen — a Kira é a nossa mentora própria, com a mesma filosofia socrática). `
+    + `O aluno está em: ${onde}. `
+    + `\n\nSUAS REGRAS SÃO INEGOCIÁVEIS:\n`
+    + `1. NUNCA diga simplesmente "certo" ou "errado", e NUNCA entregue a resposta corrigida pronta ou o código final. Seu trabalho é fazer o aluno chegar à solução sozinho.\n`
+    + `2. Leia o código ou a dúvida do aluno com atenção e identifique a causa raiz do erro de lógica ou de sintaxe.\n`
+    + `3. Explique a pista como se estivesse explicando para alguém de 12 anos: frases curtas, palavras simples, um exemplo do dia a dia se ajudar (nada de jargão técnico sem explicar).\n`
+    + `4. Aponte PARA ONDE o aluno deve olhar (ex: "olha de novo a linha 3, o que você importou no início do código?") em vez de dizer o que está errado diretamente.\n`
+    + `5. Termine SEMPRE a sua resposta visível com uma pergunta-guia que leve o aluno ao próximo passo do raciocínio dele.\n`
+    + `6. Seja calorosa, paciente e comemore pequenos progressos.\n`
+    + `7. Responda sempre em português do Brasil, a menos que o aluno escreva em inglês.\n`
+    + `\nFORMATO OBRIGATÓRIO DA RESPOSTA: escreva primeiro um raciocínio técnico curto (2-3 frases, pode usar termos técnicos, é só para o aluno curioso que quiser abrir "Pensamentos"), depois a marca exata "${KIRA_THINK_MARK}" sozinha em uma linha, e por fim a mensagem socrática que o aluno vai realmente ler (curta, simples, terminando em pergunta).`
+    + `\n\nEXEMPLO (poucas linhas, para você seguir o mesmo estilo):\n`
+    + `Aluno cola: "import pandas\\n\\ndf = pd.read_csv('vendas.csv')" e recebe NameError: name 'pd' is not defined.\n`
+    + `Sua resposta ideal:\n`
+    + `O aluno importou o pandas sem o alias 'pd' (usou "import pandas" em vez de "import pandas as pd"), por isso o interpretador não reconhece o nome 'pd' na linha seguinte.\n`
+    + `${KIRA_THINK_MARK}\n`
+    + `Boa, você já criou o dataframe! 🙂 Só uma coisa: repara na primeira linha, onde você escreveu "import pandas". Quando a gente usa "pd." mais na frente, o Python precisa saber que "pd" é um apelido pro pandas. Dá uma olhada em como a gente costuma escrever esse import no material do Sprint 1 — será que falta alguma palavrinha ali?`;
+}
+function appendChatMsg(role, text, opts){
+  opts = opts || {};
+  const body = document.getElementById('aiChatBody');
+  const wrap = document.createElement('div');
+  wrap.className = 'ai-msg-wrap ' + (role === 'user' ? 'user' : 'bot');
+
+  if(role !== 'user' && opts.think){
+    const det = document.createElement('details');
+    det.className = 'ai-msg-think';
+    const sum = document.createElement('summary');
+    sum.textContent = '🧠 Pensamentos da Kira';
+    det.appendChild(sum);
+    const p = document.createElement('div');
+    p.style.marginTop = '4px';
+    p.textContent = opts.think;
+    det.appendChild(p);
+    wrap.appendChild(det);
+  }
+
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + (role === 'user' ? 'user' : 'bot');
+  div.textContent = text;
+  wrap.appendChild(div);
+
+  const time = document.createElement('span');
+  time.className = 'ai-msg-time';
+  time.textContent = opts.time || new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  wrap.appendChild(time);
+
+  if(role !== 'user' && !opts.noFeedback){
+    const fb = document.createElement('div');
+    fb.className = 'ai-msg-feedback';
+    const up = document.createElement('button');
+    up.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
+    up.title = 'Essa dica ajudou';
+    const down = document.createElement('button');
+    down.innerHTML = '<i class="fa-regular fa-thumbs-down"></i>';
+    down.title = 'Essa dica não ajudou';
+    up.onclick = () => { up.classList.add('active'); down.classList.remove('active'); };
+    down.onclick = () => { down.classList.add('active'); up.classList.remove('active'); };
+    fb.appendChild(up); fb.appendChild(down);
+    wrap.appendChild(fb);
+  }
+
+  body.appendChild(wrap);
+  body.scrollTop = body.scrollHeight;
+  return div;
+}
+function renderChatHistory(){
+  const s = getState();
+  document.getElementById('aiChatBody').innerHTML = '';
+  if(!s.chatHistory || s.chatHistory.length === 0){
+    appendChatMsg('bot', 'Oi, eu sou a Kira 👋 Sua mentora de código aqui na PyData Academy. Configure sua chave da OpenAI em "⚙️ Configurar chave" e me conte o que você está estudando, ou cole um código com erro que eu te ajudo a encontrar o problema — sem te dar a resposta pronta, prometo, mas te ajudando a pensar até você mesmo chegar lá 😉', {noFeedback:true});
+  } else {
+    s.chatHistory.forEach(m => appendChatMsg(m.role, m.content, {think:m.think}));
+  }
+}
+async function sendChatMessage(e){
+  e.preventDefault();
+  const input = document.getElementById('aiChatInput');
+  const text = input.value.trim();
+  if(!text) return false;
+  input.value = '';
+  appendChatMsg('user', text);
+  const s = getState();
+  s.chatHistory = s.chatHistory || [];
+  s.chatHistory.push({role:'user', content:text});
+  saveState(s);
+
+  const apiKey = localStorage.getItem('pydata_openai_key');
+  if(!apiKey){
+    appendChatMsg('bot', '⚠️ Nenhuma chave de API configurada. Abra "⚙️ Configurar chave da API OpenAI" logo acima e cole sua chave (sk-...) para eu poder te responder de verdade.', {noFeedback:true});
+    return false;
+  }
+  const thinkingEl = appendChatMsg('bot', 'Pensando... 🤔', {noFeedback:true});
+  try{
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + apiKey},
+      body: JSON.stringify({
+        model:'gpt-3.5-turbo',
+        messages:[{role:'system', content: buildSystemPrompt()}, ...s.chatHistory.slice(-10).map(m => ({role:m.role, content:m.content}))],
+        temperature:0.6
+      })
+    });
+    const data = await resp.json();
+    if(data.error) throw new Error(data.error.message);
+    const raw = data.choices[0].message.content;
+    let think = '', answer = raw;
+    if(raw.includes(KIRA_THINK_MARK)){
+      const parts = raw.split(KIRA_THINK_MARK);
+      think = parts[0].trim();
+      answer = parts.slice(1).join(KIRA_THINK_MARK).trim();
+    }
+    thinkingEl.textContent = answer;
+    if(think){
+      const det = document.createElement('details');
+      det.className = 'ai-msg-think';
+      det.innerHTML = '<summary>🧠 Pensamentos da Kira</summary><div style="margin-top:4px;"></div>';
+      det.querySelector('div').textContent = think;
+      thinkingEl.parentElement.insertBefore(det, thinkingEl);
+    }
+    const s2 = getState();
+    s2.chatHistory.push({role:'assistant', content:answer, think});
+    saveState(s2);
+  }catch(err){
+    thinkingEl.textContent = '⚠️ Erro ao falar com a OpenAI: ' + err.message + '. Verifique se sua chave de API está correta e tem créditos disponíveis.';
+  }
+  return false;
+}
+
+/* ================================================================
+   INICIALIZAÇÃO
+   ================================================================ */
+applyTheme();
+applyLang();
+renderModuleGrid();
+refreshPointsPill();
+// AOS é carregado com "defer", então só fica disponível depois do evento "load"
+window.addEventListener('load', function(){
+  if(typeof AOS !== 'undefined') AOS.init({duration:600, once:true});
+});
+</script>
+</body>
+</html>
