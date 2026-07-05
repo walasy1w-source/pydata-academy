@@ -42,7 +42,7 @@ except ImportError:
     resource = None
 
 app = Flask(__name__)
-CORS(app)  # Em produção, restrinja com CORS(app, origins=["https://seusite.com"])
+CORS(app, origins=["https://walasy1w-source.github.io"])
 
 # ------------------------------------------------------------------
 # Configurações
